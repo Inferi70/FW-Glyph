@@ -25,15 +25,4 @@ namespace usb_runtime {
         TinyUSBDevice.setSerialDescriptor(serial);
     }
 
-    void registerAppDriverGetter(app_driver_getter_t getter) {
-        app_driver_getter = getter;
-    }
-
-    void registerBosDescriptorGetter(bos_descriptor_getter_t getter) {
-        bos_descriptor_getter = getter;
-    }
-
-    void registerVendorControlXfer(vendor_control_xfer_cb_t callback) {
-        vendor_control_xfer = callback;
-    }
 }
