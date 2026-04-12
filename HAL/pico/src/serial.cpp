@@ -2,8 +2,6 @@
 
 #include "stdlib.hpp"
 
-#include <Adafruit_TinyUSB.h>
-
 namespace serial {
     void init(unsigned long baudrate) {
         Serial.begin(baudrate);

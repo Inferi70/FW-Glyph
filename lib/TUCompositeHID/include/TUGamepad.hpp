@@ -24,9 +24,9 @@ SOFTWARE.
 #ifndef _TUCOMPOSITE_TUGAMEPAD_HPP
 #define _TUCOMPOSITE_TUGAMEPAD_HPP
 
-#include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <TUCompositeHID.hpp>
+#include <tusb.h>
 
 typedef struct TU_ATTR_PACKED {
     uint16_t x; // X value of left analog stick

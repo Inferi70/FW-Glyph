@@ -1,9 +1,9 @@
 #ifndef _TUCOMPOSITE_TUKEYBOARD_HPP
 #define _TUCOMPOSITE_TUKEYBOARD_HPP
 
-#include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <TUCompositeHID.hpp>
+#include <tusb.h>
 
 class TUKeyboard {
   public:

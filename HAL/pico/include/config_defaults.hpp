@@ -1,8 +1,8 @@
 #ifndef _CONFIG_DEFAULTS_HPP
 #define _CONFIG_DEFAULTS_HPP
 
-#include <Adafruit_TinyUSB.h>
 #include <config.pb.h>
+#include <tusb.h>
 
 // clang-format off
 

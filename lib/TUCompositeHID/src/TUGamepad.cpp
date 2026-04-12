@@ -23,7 +23,6 @@ SOFTWARE.
 *************************************************************************/
 #include "TUGamepad.hpp"
 
-#include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <TUCompositeHID.hpp>
 

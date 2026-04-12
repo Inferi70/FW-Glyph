@@ -7,6 +7,10 @@ def skip_adafruit_hid(node):
     return None
 
 
+def skip_adafruit_usbd_device(node):
+    return None
+
+
 def before_build():
     subprocess.run(["git", "config", "--global", "core.longpaths", "true"])
 
@@ -29,6 +33,10 @@ def before_build():
     env.AddBuildMiddleware(
         skip_adafruit_hid,
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp"
+    )
+    env.AddBuildMiddleware(
+        skip_adafruit_usbd_device,
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_Device.cpp"
     )
 
 before_build()
