@@ -3,6 +3,10 @@ import subprocess
 Import("env")
 
 
+def skip_adafruit_hid(node):
+    return None
+
+
 def before_build():
     subprocess.run(["git", "config", "--global", "core.longpaths", "true"])
 
@@ -21,5 +25,10 @@ def before_build():
     env.Append(CPPDEFINES=[
         ("FIRMWARE_VERSION", version_name)
     ])
+
+    env.AddBuildMiddleware(
+        skip_adafruit_hid,
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp"
+    )
 
 before_build()

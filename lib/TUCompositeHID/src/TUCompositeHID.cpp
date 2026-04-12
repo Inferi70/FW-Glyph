@@ -1,14 +1,13 @@
 #include "TUCompositeHID.hpp"
 
-#include <Adafruit_TinyUSB.h>
+#include "usb/TinyUSBHID.hpp"
 
 #define HID_DESCRIPTOR_BUFSIZE 1024U
 
 namespace TUCompositeHID {
     uint8_t _hid_report_desc[HID_DESCRIPTOR_BUFSIZE] = {};
     size_t _current_descriptor_len = 0;
-
-    static Adafruit_USBD_HID usb_hid = Adafruit_USBD_HID(
+    static TinyUSBHID usb_hid = TinyUSBHID(
         _hid_report_desc,
         _current_descriptor_len,
         HID_ITF_PROTOCOL_NONE,
