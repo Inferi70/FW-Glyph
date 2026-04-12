@@ -2,9 +2,8 @@
 
 #include "core/CommunicationBackend.hpp"
 #include "core/state.hpp"
+#include "usb/TinyUSBRuntime.hpp"
 #include "hardware/timer.h"
-
-#include <Adafruit_USBD_XInput.hpp>
 
 XInputBackend::XInputBackend(
     InputState &inputs,
@@ -17,7 +16,7 @@ XInputBackend::XInputBackend(
     _xinput.begin();
     Serial.begin(115200);
 
-    TinyUSBDevice.setID(0x0738, 0x4726);
+    usb_runtime::setDeviceId(0x0738, 0x4726);
 }
 
 CommunicationBackendId XInputBackend::BackendId() {

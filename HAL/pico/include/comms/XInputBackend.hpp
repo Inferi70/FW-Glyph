@@ -5,7 +5,7 @@
 #include "core/InputSource.hpp"
 #include "stdlib.hpp"
 
-#include <Adafruit_USBD_XInput.hpp>
+#include "usb/TinyUSBXInput.hpp"
 
 class XInputBackend : public CommunicationBackend {
   public:
@@ -14,7 +14,7 @@ class XInputBackend : public CommunicationBackend {
     void SendReport();
 
   private:
-    Adafruit_USBD_XInput _xinput;
+    TinyUSBXInput _xinput;
     xinput_report_t _report = {};
 };
 

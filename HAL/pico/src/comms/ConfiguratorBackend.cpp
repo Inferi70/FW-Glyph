@@ -20,7 +20,7 @@
 #include "core/InputSource.hpp"
 #include "core/Persistence.hpp"
 #include "reboot.hpp"
-#include "arduino/Adafruit_USBD_Device.h"
+#include "usb/TinyUSBRuntime.hpp"
 
 
 #include <pb_arduino.h>
@@ -39,8 +39,7 @@ ConfiguratorBackend::ConfiguratorBackend(
       _out(stream),
       _base_stream(stream),
       _config(config) {
-
-    TinyUSBDevice.setID(0x2E8A, 0x1092);
+    usb_runtime::setDeviceId(0x2E8A, 0x1092);
 }
 
 CommunicationBackendId ConfiguratorBackend::BackendId() {

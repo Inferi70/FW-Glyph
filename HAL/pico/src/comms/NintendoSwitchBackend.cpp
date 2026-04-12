@@ -2,8 +2,8 @@
 
 #include "core/CommunicationBackend.hpp"
 #include "core/state.hpp"
+#include "usb/TinyUSBRuntime.hpp"
 
-#include <Adafruit_TinyUSB.h>
 #include <TUCompositeHID.hpp>
 
 // clang-format off
@@ -69,10 +69,10 @@ NintendoSwitchBackend::NintendoSwitchBackend(
     size_t input_source_count
 )
     : CommunicationBackend(inputs, input_sources, input_source_count) {
-    USBDevice.setManufacturerDescriptor("HORI CO.,LTD.");
-    USBDevice.setProductDescriptor("POKKEN CONTROLLER");
-    USBDevice.setSerialDescriptor("1.0");
-    USBDevice.setID(0x0F0D, 0x0092);
+    usb_runtime::setManufacturer("HORI CO.,LTD.");
+    usb_runtime::setProduct("POKKEN CONTROLLER");
+    usb_runtime::setSerial("1.0");
+    usb_runtime::setDeviceId(0x0F0D, 0x0092);
 
     TUCompositeHID::begin();
 
