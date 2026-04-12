@@ -19,8 +19,6 @@ The `tiny-usb-rewrite` branch removes the project's dependence on Adafruit's Tin
 
 - External `Adafruit_TinyUSB_XInput` package:
   replaced with repo-owned `TinyUSBXInput`.
-- Adafruit runtime callback ownership:
-  replaced with repo-owned `TinyUSBRuntime`.
 - Adafruit HID wrapper ownership:
   replaced with repo-owned `TinyUSBHID`.
 - Adafruit USB device runtime implementation:
@@ -31,6 +29,8 @@ The `tiny-usb-rewrite` branch removes the project's dependence on Adafruit's Tin
   replaced with repo-owned `TinyUSBCDC.cpp`, `TinyUSBAPI.cpp`, and matching headers.
 - Adafruit RP2040 TinyUSB port glue:
   replaced with repo-owned `TinyUSBPortRP2040.cpp` and a repo-owned `Adafruit_TinyUSB.h` umbrella header.
+- Adafruit TinyUSB core C build path:
+  replaced with direct TinyUSB core sources from the framework's `pico-sdk/lib/tinyusb/src` tree.
 
 ### What Was Wrapped First
 
@@ -46,16 +46,30 @@ That let the HID transport be swapped underneath without changing every caller a
 
 For `pio run -e glyph_mk6`:
 
-- HID, XInput, USB runtime routing, CDC/API glue, RP2040 port glue, and device runtime are repo-owned.
+- HID, XInput, CDC/API glue, RP2040 port glue, and device runtime are repo-owned.
 - TinyUSB core C sources are built directly from:
   `framework-arduinopico/pico-sdk/lib/tinyusb/src`
 - The old Adafruit TinyUSB wrapper and port sources are skipped in the build script.
+
+### XInput Notes
+
+- The final XInput fix was not a descriptor tweak. The real issue was callback timing.
+- `framework-arduinopico` calls `TinyUSB_Device_Init(0)` during startup.
+- XInput app-driver/BOS/vendor callbacks therefore need to exist at USB init time.
+- The working final state keeps these callbacks as direct TinyUSB globals in `TinyUSBXInput.cpp`:
+  - `usbd_app_driver_get_cb`
+  - `tud_descriptor_bos_cb`
+  - `tud_vendor_control_xfer_cb`
+- The earlier runtime registration approach via `TinyUSBRuntime` was too late for TinyUSB startup and caused Linux `SET_CONFIGURATION` failure (`can't set config #1, error -32`).
+- Current XInput endpoint intervals are:
+  - IN `0x81`: `bInterval = 1`
+  - OUT `0x01`: `bInterval = 1`
 
 ### What Still Appears In PlatformIO
 
 PlatformIO may still print `Adafruit TinyUSB Library` in the dependency graph.
 
-That is a discovery/LDF artifact from the framework package layout, not an indication that Adafruit wrapper code is still being compiled. The actual TinyUSB objects now come from `.pio/build/glyph_mk6/TinyUSBCore/...`.
+That is a discovery/LDF artifact from the framework package layout, not an indication that Adafruit wrapper or core code is still being compiled. The actual TinyUSB objects now come from `.pio/build/glyph_mk6/TinyUSBCore/...`.
 
 ### Build Size Impact
 
@@ -64,12 +78,12 @@ Observed during this rewrite series on `glyph_mk6`:
 - Earlier passing state in this branch:
   Flash `372944` bytes, RAM `51264` bytes.
 - Current direct-TinyUSB state:
-  Flash `368624` bytes, RAM `50308` bytes.
+  Flash `368608` bytes, RAM `50296` bytes.
 
 Net change from the observed branch baseline:
 
-- Flash reduced by `4320` bytes.
-- RAM reduced by `956` bytes.
+- Flash reduced by `4336` bytes.
+- RAM reduced by `968` bytes.
 
 ### Major Commits In This Migration
 
@@ -81,7 +95,8 @@ Net change from the observed branch baseline:
 - `43312d6` `Own TinyUSB CDC layer`
 - `8249b17` `Trim bundled TinyUSB sources`
 - `e41ccf6` `Own TinyUSB RP2040 port glue`
-- `d6aee70` `Build TinyUSB core directly`
+- `71656da` `Document TinyUSB rewrite status`
+- `2c396d3` `Finalize working repo-owned XInput on direct TinyUSB`
 
 ---
 This project is licensed under the GNU GPL Version 3 - see the [LICENSE](LICENSE) file for details
