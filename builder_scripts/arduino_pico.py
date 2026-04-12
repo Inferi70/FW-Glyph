@@ -55,6 +55,7 @@ def before_build():
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/webusb/Adafruit_USBD_WebUSB.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/ports/esp32/Adafruit_TinyUSB_esp32.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/ports/nrf/Adafruit_TinyUSB_nrf.cpp",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/ports/rp2040/Adafruit_TinyUSB_rp2040.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/ports/samd/Adafruit_TinyUSB_samd.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/audio/audio_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/bth/bth_device.c",
