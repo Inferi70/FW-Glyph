@@ -14,7 +14,6 @@
 Adafruit_USBD_CDC SerialTinyUSB;
 
 uint8_t Adafruit_USBD_CDC::_instance_count = 0;
-
 Adafruit_USBD_CDC::Adafruit_USBD_CDC(void) {
     _instance = INVALID_INSTANCE;
 }
@@ -142,14 +141,14 @@ int Adafruit_USBD_CDC::peek(void) {
     }
 
     uint8_t ch;
-    return tud_cdc_n_peek(_instance, &ch) ? static_cast<int>(ch) : -1;
+    return tud_cdc_n_peek(_instance, &ch) ? (int)ch : -1;
 }
 
 int Adafruit_USBD_CDC::read(void) {
     if (!isValid()) {
         return -1;
     }
-    return static_cast<int>(tud_cdc_n_read_char(_instance));
+    return (int)tud_cdc_n_read_char(_instance);
 }
 
 size_t Adafruit_USBD_CDC::read(uint8_t *buffer, size_t size) {

@@ -2,10 +2,11 @@
 
 #if CFG_TUD_ENABLED
 
-#include "Arduino.h"
 #include "arduino/Adafruit_TinyUSB_API.h"
 #include "arduino/Adafruit_USBD_CDC.h"
 #include "arduino/Adafruit_USBD_Device.h"
+
+#include "Arduino.h"
 
 #ifndef USB_VID
 #ifdef BOARD_VENDORID
@@ -47,15 +48,265 @@ enum { STRID_LANGUAGE = 0, STRID_MANUFACTURER, STRID_PRODUCT, STRID_SERIAL };
 
 Adafruit_USBD_Device TinyUSBDevice;
 
-namespace {
+Adafruit_USBD_Device::Adafruit_USBD_Device(void) {}
+
+void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t *buf, uint32_t buflen) {
+    if (buflen < _desc_cfg_maxlen) {
+        return;
+    }
+
+    memcpy(buf, _desc_cfg, _desc_cfg_len);
+    _desc_cfg = buf;
+    _desc_cfg_maxlen = buflen;
+}
+
+void Adafruit_USBD_Device::setID(uint16_t vid, uint16_t pid) {
+    _desc_device.idVendor = vid;
+    _desc_device.idProduct = pid;
+}
+
+void Adafruit_USBD_Device::setVersion(uint16_t bcd) {
+    _desc_device.bcdUSB = bcd;
+}
+
+void Adafruit_USBD_Device::setDeviceVersion(uint16_t bcd) {
+    _desc_device.bcdDevice = bcd;
+}
+
+void Adafruit_USBD_Device::setLanguageDescriptor(uint16_t language_id) {
+    _desc_str_arr[STRID_LANGUAGE] = (const char *)((uint32_t)language_id);
+}
+
+void Adafruit_USBD_Device::setManufacturerDescriptor(const char *s) {
+    _desc_str_arr[STRID_MANUFACTURER] = s;
+}
+
+void Adafruit_USBD_Device::setProductDescriptor(const char *s) {
+    _desc_str_arr[STRID_PRODUCT] = s;
+}
+
+void Adafruit_USBD_Device::setSerialDescriptor(const char *s) {
+    _desc_str_arr[STRID_SERIAL] = s;
+}
+
+uint8_t Adafruit_USBD_Device::addStringDescriptor(const char *s) {
+    if (_desc_str_count >= STRING_DESCRIPTOR_MAX || s == NULL) {
+        return 0;
+    }
+
+    uint8_t index = _desc_str_count++;
+    _desc_str_arr[index] = s;
+    return index;
+}
+
+void Adafruit_USBD_Device::task(void) {
+    tud_task();
+}
+
+bool Adafruit_USBD_Device::mounted(void) {
+    return tud_mounted();
+}
+
+bool Adafruit_USBD_Device::suspended(void) {
+    return tud_suspended();
+}
+
+bool Adafruit_USBD_Device::ready(void) {
+    return tud_ready();
+}
+
+bool Adafruit_USBD_Device::remoteWakeup(void) {
+    return tud_remote_wakeup();
+}
+
+bool Adafruit_USBD_Device::detach(void) {
+    return tud_disconnect();
+}
+
+bool Adafruit_USBD_Device::attach(void) {
+    return tud_connect();
+}
+
+void Adafruit_USBD_Device::clearConfiguration(void) {
+    tusb_desc_device_t const desc_dev = {.bLength = sizeof(tusb_desc_device_t),
+                                         .bDescriptorType = TUSB_DESC_DEVICE,
+                                         .bcdUSB = 0x0200,
+                                         .bDeviceClass = 0,
+                                         .bDeviceSubClass = 0,
+                                         .bDeviceProtocol = 0,
+                                         .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
+                                         .idVendor = USB_VID,
+                                         .idProduct = USB_PID,
+                                         .bcdDevice = 0x0100,
+                                         .iManufacturer = STRID_MANUFACTURER,
+                                         .iProduct = STRID_PRODUCT,
+                                         .iSerialNumber = STRID_SERIAL,
+                                         .bNumConfigurations = 0x01};
+
+    _desc_device = desc_dev;
+
+    uint8_t const dev_cfg[sizeof(tusb_desc_configuration_t)] = {
+        TUD_CONFIG_DESCRIPTOR(
+            1,
+            0,
+            0,
+            sizeof(tusb_desc_configuration_t),
+            TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP | TU_BIT(7),
+            100
+        ),
+    };
+
+    memcpy(_desc_cfg_buffer, dev_cfg, sizeof(tusb_desc_configuration_t));
+    _desc_cfg = _desc_cfg_buffer;
+    _desc_cfg_maxlen = sizeof(_desc_cfg_buffer);
+    _desc_cfg_len = sizeof(tusb_desc_configuration_t);
+
+    _itf_count = 0;
+    _epin_count = _epout_count = 1;
+
+    memset(_desc_str_arr, 0, sizeof(_desc_str_arr));
+    _desc_str_arr[STRID_LANGUAGE] = (const char *)((uint32_t)USB_LANGUAGE);
+    _desc_str_arr[STRID_MANUFACTURER] = USB_MANUFACTURER;
+    _desc_str_arr[STRID_PRODUCT] = USB_PRODUCT;
+    _desc_str_arr[STRID_SERIAL] = nullptr;
+    _desc_str_count = 4;
+}
+
+bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
+    uint8_t *desc = _desc_cfg + _desc_cfg_len;
+    uint16_t const len =
+        itf.getInterfaceDescriptor(_itf_count, desc, _desc_cfg_maxlen - _desc_cfg_len);
+    uint8_t *desc_end = desc + len;
+    const char *desc_str = itf.getStringDescriptor();
+
+    if (!len) {
+        return false;
+    }
+
+    while (desc < desc_end) {
+        if (tu_desc_type(desc) == TUSB_DESC_INTERFACE) {
+            tusb_desc_interface_t *desc_itf = (tusb_desc_interface_t *)desc;
+            if (desc_itf->bAlternateSetting == 0) {
+                _itf_count++;
+                if (desc_str && (_desc_str_count < STRING_DESCRIPTOR_MAX)) {
+                    _desc_str_arr[_desc_str_count] = desc_str;
+                    desc_itf->iInterface = _desc_str_count;
+                    _desc_str_count++;
+                    desc_str = NULL;
+                }
+            }
+        } else if (tu_desc_type(desc) == TUSB_DESC_ENDPOINT) {
+            tusb_desc_endpoint_t *desc_ep = (tusb_desc_endpoint_t *)desc;
+            desc_ep->bEndpointAddress |=
+                (desc_ep->bEndpointAddress & 0x80) ? _epin_count++ : _epout_count++;
+        }
+
+        if (desc[0] == 0) {
+            return false;
+        }
+
+        desc += tu_desc_len(desc);
+    }
+
+    _desc_cfg_len += len;
+
+    tusb_desc_configuration_t *config = (tusb_desc_configuration_t *)_desc_cfg;
+    config->wTotalLength = _desc_cfg_len;
+    config->bNumInterfaces = _itf_count;
+
+    return true;
+}
+
+bool Adafruit_USBD_Device::begin(uint8_t rhport) {
+    clearConfiguration();
+
+    _desc_device.bDeviceClass = TUSB_CLASS_MISC;
+    _desc_device.bDeviceSubClass = MISC_SUBCLASS_COMMON;
+    _desc_device.bDeviceProtocol = MISC_PROTOCOL_IAD;
+
+    SerialTinyUSB.begin(115200);
+    TinyUSB_Port_InitDevice(rhport);
+
+    return true;
+}
+
+static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize);
+
+uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t *serial_utf16) {
+    if (!_desc_str_arr[STRID_SERIAL]) {
+        uint8_t serial_id[16] __attribute__((aligned(4)));
+        uint8_t const serial_len = TinyUSB_Port_GetSerialNumber(serial_id);
+
+        for (uint8_t i = 0; i < serial_len; i++) {
+            for (uint8_t j = 0; j < 2; j++) {
+                const char nibble_to_hex[16] = {
+                    '0', '1', '2', '3', '4', '5', '6', '7',
+                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+                };
+
+                uint8_t nibble = (serial_id[i] >> (j * 4)) & 0xf;
+                serial_utf16[1 + i * 2 + (1 - j)] = nibble_to_hex[nibble];
+            }
+        }
+
+        return 2 * serial_len;
+    }
+
+    return strcpy_utf16(_desc_str_arr[STRID_SERIAL], serial_utf16 + 1, 32);
+}
+
+uint16_t const *Adafruit_USBD_Device::descriptor_string_cb(uint8_t index, uint16_t langid) {
+    (void)langid;
+
+    uint8_t chr_count;
+
+    switch (index) {
+        case STRID_LANGUAGE:
+            _desc_str[1] = ((uint16_t)((uint32_t)_desc_str_arr[STRID_LANGUAGE]));
+            chr_count = 1;
+            break;
+
+        case STRID_SERIAL:
+            chr_count = getSerialDescriptor(_desc_str);
+            break;
+
+        default:
+            if (index >= _desc_str_count) {
+                return NULL;
+            }
+
+            chr_count = strcpy_utf16(_desc_str_arr[index], _desc_str + 1, 32);
+            break;
+    }
+
+    _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
+    return _desc_str;
+}
+
+extern "C" {
+
+uint8_t const *tud_descriptor_device_cb(void) {
+    return (uint8_t const *)&TinyUSBDevice._desc_device;
+}
+
+uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
+    (void)index;
+    return TinyUSBDevice._desc_cfg;
+}
+
+uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
+    return TinyUSBDevice.descriptor_string_cb(index, langid);
+}
+
+}
 
 constexpr static inline bool isInvalidUtf8Octet(uint8_t t) {
     return (t == 0xc0) || (t == 0xC1) || (t >= 0xF5);
 }
 
 static int8_t utf8Codepoint(const uint8_t *utf8, uint32_t *codepointp) {
-    constexpr uint32_t CODEPOINT_LOWEST_SURROGATE_HALF = 0xD800;
-    constexpr uint32_t CODEPOINT_HIGHEST_SURROGATE_HALF = 0xDFFF;
+    const uint32_t CODEPOINT_LOWEST_SURROGATE_HALF = 0xD800;
+    const uint32_t CODEPOINT_HIGHEST_SURROGATE_HALF = 0xDFFF;
 
     *codepointp = 0xFFFD;
     uint32_t codepoint;
@@ -114,7 +365,7 @@ static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize) {
 
     while (s[i] != 0) {
         uint32_t codepoint;
-        int8_t utf8len = utf8Codepoint(reinterpret_cast<const uint8_t *>(s) + i, &codepoint);
+        int8_t utf8len = utf8Codepoint((const uint8_t *)s + i, &codepoint);
 
         if (utf8len < 0) {
             i++;
@@ -123,276 +374,28 @@ static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize) {
 
         i += utf8len;
 
-        if (codepoint <= 0xFFFF) {
-            if (buflen + 1 > bufsize) {
+        if (codepoint <= 0xffff) {
+            if (buflen == bufsize) {
                 break;
             }
+
             buf[buflen++] = codepoint;
         } else {
-            if (buflen + 2 > bufsize) {
+            if (buflen + 1 >= bufsize) {
                 break;
             }
 
             codepoint -= 0x10000;
-            buf[buflen++] = 0xD800 | (codepoint >> 10);
-            buf[buflen++] = 0xDC00 | (codepoint & 0x3FF);
+            buf[buflen++] = (codepoint >> 10) + 0xd800;
+            buf[buflen++] = (codepoint & 0x3ff) + 0xdc00;
         }
     }
 
     return buflen;
 }
 
-}
-
-Adafruit_USBD_Device::Adafruit_USBD_Device(void) {}
-
-void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t *buf, uint32_t buflen) {
-    if (buflen < _desc_cfg_maxlen) {
-        return;
-    }
-
-    memcpy(buf, _desc_cfg, _desc_cfg_len);
-    _desc_cfg = buf;
-    _desc_cfg_maxlen = buflen;
-}
-
-void Adafruit_USBD_Device::setID(uint16_t vid, uint16_t pid) {
-    _desc_device.idVendor = vid;
-    _desc_device.idProduct = pid;
-}
-
-void Adafruit_USBD_Device::setVersion(uint16_t bcd) {
-    _desc_device.bcdUSB = bcd;
-}
-
-void Adafruit_USBD_Device::setDeviceVersion(uint16_t bcd) {
-    _desc_device.bcdDevice = bcd;
-}
-
-void Adafruit_USBD_Device::setLanguageDescriptor(uint16_t language_id) {
-    _desc_str_arr[STRID_LANGUAGE] = reinterpret_cast<const char *>(static_cast<uintptr_t>(language_id));
-}
-
-void Adafruit_USBD_Device::setManufacturerDescriptor(const char *s) {
-    _desc_str_arr[STRID_MANUFACTURER] = s;
-}
-
-void Adafruit_USBD_Device::setProductDescriptor(const char *s) {
-    _desc_str_arr[STRID_PRODUCT] = s;
-}
-
-void Adafruit_USBD_Device::setSerialDescriptor(const char *s) {
-    _desc_str_arr[STRID_SERIAL] = s;
-}
-
-uint8_t Adafruit_USBD_Device::addStringDescriptor(const char *s) {
-    if (_desc_str_count >= STRING_DESCRIPTOR_MAX || s == nullptr) {
-        return 0;
-    }
-
-    uint8_t index = _desc_str_count++;
-    _desc_str_arr[index] = s;
-    return index;
-}
-
-void Adafruit_USBD_Device::task(void) {
-    tud_task();
-}
-
-bool Adafruit_USBD_Device::mounted(void) {
-    return tud_mounted();
-}
-
-bool Adafruit_USBD_Device::suspended(void) {
-    return tud_suspended();
-}
-
-bool Adafruit_USBD_Device::ready(void) {
-    return tud_ready();
-}
-
-bool Adafruit_USBD_Device::remoteWakeup(void) {
-    return tud_remote_wakeup();
-}
-
-bool Adafruit_USBD_Device::detach(void) {
-    return tud_disconnect();
-}
-
-bool Adafruit_USBD_Device::attach(void) {
-    return tud_connect();
-}
-
-void Adafruit_USBD_Device::clearConfiguration(void) {
-    tusb_desc_device_t const desc_dev = {
-        .bLength = sizeof(tusb_desc_device_t),
-        .bDescriptorType = TUSB_DESC_DEVICE,
-        .bcdUSB = 0x0200,
-        .bDeviceClass = 0,
-        .bDeviceSubClass = 0,
-        .bDeviceProtocol = 0,
-        .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-        .idVendor = USB_VID,
-        .idProduct = USB_PID,
-        .bcdDevice = 0x0100,
-        .iManufacturer = STRID_MANUFACTURER,
-        .iProduct = STRID_PRODUCT,
-        .iSerialNumber = STRID_SERIAL,
-        .bNumConfigurations = 0x01
-    };
-
-    _desc_device = desc_dev;
-
-    uint8_t const dev_cfg[sizeof(tusb_desc_configuration_t)] = {
-        TUD_CONFIG_DESCRIPTOR(
-            1,
-            0,
-            0,
-            sizeof(tusb_desc_configuration_t),
-            TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP | TU_BIT(7),
-            100
-        ),
-    };
-
-    memcpy(_desc_cfg_buffer, dev_cfg, sizeof(tusb_desc_configuration_t));
-    _desc_cfg = _desc_cfg_buffer;
-    _desc_cfg_maxlen = sizeof(_desc_cfg_buffer);
-    _desc_cfg_len = sizeof(tusb_desc_configuration_t);
-
-    _itf_count = 0;
-    _epin_count = 1;
-    _epout_count = 1;
-
-    memset(_desc_str_arr, 0, sizeof(_desc_str_arr));
-    _desc_str_arr[STRID_LANGUAGE] = reinterpret_cast<const char *>(static_cast<uintptr_t>(USB_LANGUAGE));
-    _desc_str_arr[STRID_MANUFACTURER] = USB_MANUFACTURER;
-    _desc_str_arr[STRID_PRODUCT] = USB_PRODUCT;
-    _desc_str_arr[STRID_SERIAL] = nullptr;
-    _desc_str_count = 4;
-}
-
-bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
-    uint8_t *desc = _desc_cfg + _desc_cfg_len;
-    uint16_t const len =
-        itf.getInterfaceDescriptor(_itf_count, desc, _desc_cfg_maxlen - _desc_cfg_len);
-    uint8_t *desc_end = desc + len;
-    const char *desc_str = itf.getStringDescriptor();
-
-    if (!len) {
-        return false;
-    }
-
-    while (desc < desc_end) {
-        if (tu_desc_type(desc) == TUSB_DESC_INTERFACE) {
-            auto *desc_itf = reinterpret_cast<tusb_desc_interface_t *>(desc);
-            if (desc_itf->bAlternateSetting == 0) {
-                _itf_count++;
-                if (desc_str && (_desc_str_count < STRING_DESCRIPTOR_MAX)) {
-                    _desc_str_arr[_desc_str_count] = desc_str;
-                    desc_itf->iInterface = _desc_str_count;
-                    _desc_str_count++;
-                    desc_str = nullptr;
-                }
-            }
-        } else if (tu_desc_type(desc) == TUSB_DESC_ENDPOINT) {
-            auto *desc_ep = reinterpret_cast<tusb_desc_endpoint_t *>(desc);
-            desc_ep->bEndpointAddress |=
-                (desc_ep->bEndpointAddress & 0x80) ? _epin_count++ : _epout_count++;
-        }
-
-        if (desc[0] == 0) {
-            return false;
-        }
-
-        desc += tu_desc_len(desc);
-    }
-
-    _desc_cfg_len += len;
-
-    auto *config = reinterpret_cast<tusb_desc_configuration_t *>(_desc_cfg);
-    config->wTotalLength = _desc_cfg_len;
-    config->bNumInterfaces = _itf_count;
-
-    return true;
-}
-
-bool Adafruit_USBD_Device::begin(uint8_t rhport) {
-    clearConfiguration();
-
-    _desc_device.bDeviceClass = TUSB_CLASS_MISC;
-    _desc_device.bDeviceSubClass = MISC_SUBCLASS_COMMON;
-    _desc_device.bDeviceProtocol = MISC_PROTOCOL_IAD;
-
-    SerialTinyUSB.begin(115200);
-    TinyUSB_Port_InitDevice(rhport);
-
-    return true;
-}
-
-uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t *serial_utf16) {
-    if (!_desc_str_arr[STRID_SERIAL]) {
-        uint8_t serial_id[16] __attribute__((aligned(4)));
-        uint8_t const serial_len = TinyUSB_Port_GetSerialNumber(serial_id);
-
-        for (uint8_t i = 0; i < serial_len; i++) {
-            for (uint8_t j = 0; j < 2; j++) {
-                const char nibble_to_hex[16] = {
-                    '0', '1', '2', '3', '4', '5', '6', '7',
-                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-                };
-
-                uint8_t nibble = (serial_id[i] >> (j * 4)) & 0xf;
-                serial_utf16[1 + i * 2 + (1 - j)] = nibble_to_hex[nibble];
-            }
-        }
-
-        return 2 * serial_len;
-    }
-
-    return strcpy_utf16(_desc_str_arr[STRID_SERIAL], serial_utf16 + 1, 32);
-}
-
-uint16_t const *Adafruit_USBD_Device::descriptor_string_cb(uint8_t index, uint16_t langid) {
-    (void)langid;
-
-    uint8_t chr_count;
-
-    switch (index) {
-        case STRID_LANGUAGE:
-            _desc_str[1] = static_cast<uint16_t>(reinterpret_cast<uintptr_t>(_desc_str_arr[STRID_LANGUAGE]));
-            chr_count = 1;
-            break;
-        case STRID_SERIAL:
-            chr_count = getSerialDescriptor(_desc_str);
-            break;
-        default:
-            if (index >= _desc_str_count) {
-                return nullptr;
-            }
-
-            chr_count = strcpy_utf16(_desc_str_arr[index], _desc_str + 1, 32);
-            break;
-    }
-
-    _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
-    return _desc_str;
-}
-
-extern "C" {
-
-uint8_t const *tud_descriptor_device_cb(void) {
-    return reinterpret_cast<uint8_t const *>(&TinyUSBDevice._desc_device);
-}
-
-uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
-    (void)index;
-    return TinyUSBDevice._desc_cfg;
-}
-
-uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
-    return TinyUSBDevice.descriptor_string_cb(index, langid);
-}
-
-}
+#if CFG_TUD_DFU_RUNTIME
+void tud_dfu_runtime_reboot_to_dfu_cb(void) {}
+#endif
 
 #endif

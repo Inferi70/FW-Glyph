@@ -17,7 +17,7 @@
   9, TUSB_DESC_INTERFACE, _itfnum, 0, 2, TUSB_CLASS_VENDOR_SPECIFIC, XINPUT_SUBCLASS_DEFAULT, XINPUT_PROTOCOL_DEFAULT, _stridx, \
   16, HID_DESC_TYPE_HID, U16_TO_U8S_LE(0x0110), 0x01, 0x24, 0x81, 0x14, 0x03, 0x00, 0x03, 0x13, 0x01, 0x00, 0x03, 0, \
   7, TUSB_DESC_ENDPOINT, _epin, TUSB_XFER_INTERRUPT, U16_TO_U8S_LE(_epsize), _ep_interval, \
-  7, TUSB_DESC_ENDPOINT, _epout, TUSB_XFER_INTERRUPT, U16_TO_U8S_LE(_epsize), 8
+  7, TUSB_DESC_ENDPOINT, _epout, TUSB_XFER_INTERRUPT, U16_TO_U8S_LE(_epsize), 1
 
 typedef struct __attribute((packed, aligned(1))) {
     uint8_t report_id;
@@ -64,6 +64,11 @@ bool xinput_xfer_callback(
     xfer_result_t result,
     uint32_t xferred_bytes
 );
+bool xinput_vendor_control_xfer_cb(
+    uint8_t rhport,
+    uint8_t stage,
+    const tusb_control_request_t *request
+);
 
 class TinyUSBXInput : public Adafruit_USBD_Interface {
   public:
@@ -95,7 +100,7 @@ class TinyUSBXInput : public Adafruit_USBD_Interface {
         uint32_t xferred_bytes
     );
     friend const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_count);
-    friend bool tud_vendor_control_xfer_cb(
+    friend bool xinput_vendor_control_xfer_cb(
         uint8_t rhport,
         uint8_t stage,
         const tusb_control_request_t *request

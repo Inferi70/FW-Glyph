@@ -37,29 +37,3 @@ namespace usb_runtime {
         vendor_control_xfer = callback;
     }
 }
-
-extern "C" const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_count) {
-    if (usb_runtime::app_driver_getter == nullptr) {
-        *driver_count = 0;
-        return nullptr;
-    }
-    return usb_runtime::app_driver_getter(driver_count);
-}
-
-extern "C" const uint8_t *tud_descriptor_bos_cb(void) {
-    if (usb_runtime::bos_descriptor_getter == nullptr) {
-        return nullptr;
-    }
-    return usb_runtime::bos_descriptor_getter();
-}
-
-extern "C" bool tud_vendor_control_xfer_cb(
-    uint8_t rhport,
-    uint8_t stage,
-    const tusb_control_request_t *request
-) {
-    if (usb_runtime::vendor_control_xfer == nullptr) {
-        return false;
-    }
-    return usb_runtime::vendor_control_xfer(rhport, stage, request);
-}

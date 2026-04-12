@@ -1,6 +1,4 @@
 #include "usb/TinyUSBXInput.hpp"
-#include "usb/TinyUSBRuntime.hpp"
-
 #include "device/usbd_pvt.h"
 #include "tusb_option.h"
 
@@ -8,15 +6,30 @@ enum {
     VENDOR_REQUEST_MICROSOFT = 1,
 };
 
-static TinyUSBXInput *xinput_dev = nullptr;
-
 static void xinput_init(void);
-static void xinput_reset(uint8_t rhport);
+void xinput_reset(uint8_t rhport);
 static bool xinput_control_xfer_callback(
     uint8_t rhport,
     uint8_t stage,
     const tusb_control_request_t *request
 );
+bool xinput_vendor_control_xfer_cb(
+    uint8_t rhport,
+    uint8_t stage,
+    const tusb_control_request_t *request
+);
+
+static usbd_class_driver_t const xinput_driver = {
+#if CFG_TUSB_DEBUG >= 2
+    .name = "XINPUT",
+#endif
+    .init = xinput_init,
+    .reset = xinput_reset,
+    .open = xinput_open,
+    .control_xfer_cb = xinput_control_xfer_callback,
+    .xfer_cb = xinput_xfer_callback,
+    .sof = nullptr
+};
 
 #define BOS_TOTAL_LEN (TUD_BOS_DESC_LEN + TUD_BOS_MICROSOFT_OS_DESC_LEN)
 #define MS_OS_20_DESC_LEN 0xB2
@@ -25,6 +38,8 @@ const uint8_t desc_bos[] = {
     TUD_BOS_DESCRIPTOR(BOS_TOTAL_LEN, 1),
     TUD_BOS_MS_OS_20_DESCRIPTOR(MS_OS_20_DESC_LEN, VENDOR_REQUEST_MICROSOFT)
 };
+
+static TinyUSBXInput *xinput_dev = nullptr;
 
 uint8_t desc_ms_os_20[MS_OS_20_DESC_LEN] = {
     U16_TO_U8S_LE(0x000A), U16_TO_U8S_LE(MS_OS_20_SET_HEADER_DESCRIPTOR),
@@ -52,27 +67,6 @@ uint8_t desc_ms_os_20[MS_OS_20_DESC_LEN] = {
     '7', 0x00, '9', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-static const usbd_class_driver_t xinput_driver = {
-#if CFG_TUSB_DEBUG >= 2
-    .name = "XINPUT",
-#endif
-    .init = xinput_init,
-    .reset = xinput_reset,
-    .open = xinput_open,
-    .control_xfer_cb = xinput_control_xfer_callback,
-    .xfer_cb = xinput_xfer_callback,
-    .sof = nullptr
-};
-
-static const usbd_class_driver_t *get_xinput_driver(uint8_t *driver_count) {
-    *driver_count = 1;
-    return &xinput_driver;
-}
-
-static const uint8_t *get_xinput_bos_descriptor() {
-    return desc_bos;
-}
-
 TinyUSBXInput::TinyUSBXInput(uint8_t interval_ms) {
     _interval_ms = interval_ms;
 }
@@ -93,16 +87,13 @@ uint16_t TinyUSBXInput::getInterfaceDescriptor(uint8_t itfnum, uint8_t *buf, uin
 }
 
 bool TinyUSBXInput::begin(void) {
-    usb_runtime::registerAppDriverGetter(get_xinput_driver);
-    usb_runtime::registerBosDescriptorGetter(get_xinput_bos_descriptor);
-    usb_runtime::registerVendorControlXfer(tud_vendor_control_xfer_cb);
+    xinput_dev = this;
 
     if (!TinyUSBDevice.addInterface(*this)) {
         return false;
     }
 
-    usb_runtime::setDeviceVersion(0x0210);
-    xinput_dev = this;
+    TinyUSBDevice.setVersion(0x0210);
     return true;
 }
 
@@ -146,12 +137,13 @@ bool send_xinput_report(xinput_report_t *report) {
         usbd_edpt_release(TUD_OPT_RHPORT, xinput_dev->_endpoint_in);
         sent = true;
     }
+
     return sent;
 }
 
 static void xinput_init(void) {}
 
-static void xinput_reset(uint8_t rhport) {
+void xinput_reset(uint8_t rhport) {
     (void)rhport;
 }
 
@@ -211,9 +203,6 @@ bool xinput_xfer_callback(
     uint32_t xferred_bytes
 ) {
     (void)rhport;
-    (void)result;
-    (void)xferred_bytes;
-
     if (ep_addr == xinput_dev->_endpoint_out) {
         usbd_edpt_xfer(
             TUD_OPT_RHPORT,
@@ -222,11 +211,10 @@ bool xinput_xfer_callback(
             XINPUT_EPSIZE
         );
     }
-
     return true;
 }
 
-bool tud_vendor_control_xfer_cb(
+bool xinput_vendor_control_xfer_cb(
     uint8_t rhport,
     uint8_t stage,
     const tusb_control_request_t *request
@@ -247,17 +235,33 @@ bool tud_vendor_control_xfer_cb(
                         uint16_t total_len;
                         memcpy(&total_len, desc_ms_os_20 + 8, 2);
                         return tud_control_xfer(rhport, request, (void *)desc_ms_os_20, total_len);
+                    } else {
+                        return false;
                     }
-                    return false;
-
                 default:
                     break;
             }
             break;
-
         default:
             return false;
     }
 
     return true;
+}
+
+extern "C" const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_count) {
+    *driver_count = 1;
+    return &xinput_driver;
+}
+
+extern "C" const uint8_t *tud_descriptor_bos_cb(void) {
+    return desc_bos;
+}
+
+extern "C" bool tud_vendor_control_xfer_cb(
+    uint8_t rhport,
+    uint8_t stage,
+    const tusb_control_request_t *request
+) {
+    return xinput_vendor_control_xfer_cb(rhport, stage, request);
 }

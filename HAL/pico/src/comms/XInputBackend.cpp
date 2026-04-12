@@ -17,6 +17,14 @@ XInputBackend::XInputBackend(
     Serial.begin(115200);
 
     usb_runtime::setDeviceId(0x0738, 0x4726);
+
+    absolute_time_t start_time = get_absolute_time();
+    while (!_xinput.ready()) {
+        if ((get_absolute_time() - start_time) > 1000 * 250) {
+            break;
+        }
+        tight_loop_contents();
+    }
 }
 
 CommunicationBackendId XInputBackend::BackendId() {

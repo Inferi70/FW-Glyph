@@ -1,6 +1,6 @@
 #include "tusb_option.h"
 
-#if defined(ARDUINO_ARCH_RP2040) && CFG_TUD_ENABLED
+#if defined ARDUINO_ARCH_RP2040 && CFG_TUD_ENABLED
 
 #include "Arduino.h"
 
@@ -25,13 +25,13 @@ static unsigned int USB_TASK_IRQ;
 #define get_unique_id(_serial) flash_get_unique_id(_serial)
 #else
 #include "pico/unique_id.h"
-#define get_unique_id(_serial) pico_get_unique_board_id((pico_unique_board_id_t *)(_serial))
+#define get_unique_id(_serial) pico_get_unique_board_id((pico_unique_board_id_t *)_serial);
 #endif
 
 mutex_t __usb_mutex;
 
 static void usb_task_irq(void) {
-    if (mutex_try_enter(&__usb_mutex, nullptr)) {
+    if (mutex_try_enter(&__usb_mutex, NULL)) {
         tud_task();
         mutex_exit(&__usb_mutex);
     }
@@ -77,7 +77,7 @@ uint8_t TinyUSB_Port_GetSerialNumber(uint8_t serial_id[16]) {
 extern "C" {
 
 void TinyUSB_Device_Task(void) {
-    if (mutex_try_enter(&__usb_mutex, nullptr)) {
+    if (mutex_try_enter(&__usb_mutex, NULL)) {
         tud_task();
         mutex_exit(&__usb_mutex);
     }

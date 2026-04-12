@@ -68,9 +68,9 @@ def before_build():
 
     skip_patterns = [
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp",
-        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_Device.cpp",
-        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_CDC.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_TinyUSB_API.cpp",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_CDC.cpp",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_Device.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBH_Host.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/cdc/Adafruit_USBH_CDC.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/midi/Adafruit_USBD_MIDI.cpp",
@@ -87,8 +87,8 @@ def before_build():
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/cdc/cdc_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/dfu/dfu_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/dfu/dfu_rt_device.c",
-        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/hid/hid_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/hid/hid_host.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/hid/hid_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/midi/midi_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/msc/msc_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/msc/msc_host.c",
