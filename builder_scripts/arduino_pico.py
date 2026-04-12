@@ -11,6 +11,14 @@ def skip_adafruit_usbd_device(node):
     return None
 
 
+def skip_adafruit_usbd_cdc(node):
+    return None
+
+
+def skip_adafruit_tinyusb_api(node):
+    return None
+
+
 def before_build():
     subprocess.run(["git", "config", "--global", "core.longpaths", "true"])
 
@@ -37,6 +45,14 @@ def before_build():
     env.AddBuildMiddleware(
         skip_adafruit_usbd_device,
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_Device.cpp"
+    )
+    env.AddBuildMiddleware(
+        skip_adafruit_usbd_cdc,
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_CDC.cpp"
+    )
+    env.AddBuildMiddleware(
+        skip_adafruit_tinyusb_api,
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_TinyUSB_API.cpp"
     )
 
 before_build()
