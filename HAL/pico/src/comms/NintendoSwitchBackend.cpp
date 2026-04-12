@@ -74,7 +74,7 @@ NintendoSwitchBackend::NintendoSwitchBackend(
     USBDevice.setSerialDescriptor("1.0");
     USBDevice.setID(0x0F0D, 0x0092);
 
-    TUCompositeHID::_usb_hid.begin();
+    TUCompositeHID::begin();
 
     _report = {
         y: false,
@@ -115,7 +115,7 @@ void NintendoSwitchBackend::SendReport() {
     ScanInputs(InputScanSpeed::SLOW);
     ScanInputs(InputScanSpeed::MEDIUM);
 
-    while (!TUCompositeHID::_usb_hid.ready()) {
+    while (!TUCompositeHID::ready()) {
         tight_loop_contents();
     }
 
@@ -149,7 +149,7 @@ void NintendoSwitchBackend::SendReport() {
     _report.hat =
         GetHatPosition(_outputs.dpadLeft, _outputs.dpadRight, _outputs.dpadDown, _outputs.dpadUp);
 
-    TUCompositeHID::_usb_hid.sendReport(_report_id, &_report, sizeof(switch_gamepad_report_t));
+    TUCompositeHID::sendReport(_report_id, &_report, sizeof(switch_gamepad_report_t));
 }
 
 switch_gamepad_hat_t NintendoSwitchBackend::GetHatPosition(

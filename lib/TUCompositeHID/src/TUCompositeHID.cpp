@@ -8,7 +8,7 @@ namespace TUCompositeHID {
     uint8_t _hid_report_desc[HID_DESCRIPTOR_BUFSIZE] = {};
     size_t _current_descriptor_len = 0;
 
-    Adafruit_USBD_HID _usb_hid = Adafruit_USBD_HID(
+    static Adafruit_USBD_HID usb_hid = Adafruit_USBD_HID(
         _hid_report_desc,
         _current_descriptor_len,
         HID_ITF_PROTOCOL_NONE,
@@ -25,8 +25,20 @@ namespace TUCompositeHID {
         }
         _current_descriptor_len += descriptor_len;
 
-        _usb_hid.setReportDescriptor(_hid_report_desc, _current_descriptor_len);
+        usb_hid.setReportDescriptor(_hid_report_desc, _current_descriptor_len);
 
         return true;
+    }
+
+    void begin() {
+        usb_hid.begin();
+    }
+
+    bool ready() {
+        return usb_hid.ready();
+    }
+
+    bool sendReport(uint8_t report_id, void const *report, size_t len) {
+        return usb_hid.sendReport(report_id, report, len);
     }
 }

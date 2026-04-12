@@ -80,18 +80,18 @@ void TUGamepad::registerDescriptor() {
 }
 
 void TUGamepad::begin() {
-    TUCompositeHID::_usb_hid.begin();
+    TUCompositeHID::begin();
 
     // Release all buttons, center all sticks, etc.
     resetInputs();
 }
 
 bool TUGamepad::ready() {
-    return TUCompositeHID::_usb_hid.ready();
+    return TUCompositeHID::ready();
 };
 
 bool TUGamepad::sendState() {
-    return TUCompositeHID::_usb_hid.sendReport(_report_id, &_report, sizeof(gamepad_report_t));
+    return TUCompositeHID::sendReport(_report_id, &_report, sizeof(gamepad_report_t));
 }
 
 void TUGamepad::resetInputs() {

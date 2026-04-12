@@ -5,9 +5,10 @@
 #include <Arduino.h>
 
 namespace TUCompositeHID {
-    extern Adafruit_USBD_HID _usb_hid;
-
     bool addDescriptor(uint8_t *descriptor, size_t descriptor_len);
+    void begin();
+    bool ready();
+    bool sendReport(uint8_t report_id, void const *report, size_t len);
 }
 
 #endif

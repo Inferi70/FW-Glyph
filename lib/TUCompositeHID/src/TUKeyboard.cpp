@@ -14,7 +14,7 @@ void TUKeyboard::registerDescriptor() {
 }
 
 void TUKeyboard::begin() {
-    TUCompositeHID::_usb_hid.begin();
+    TUCompositeHID::begin();
     releaseAll();
 }
 
@@ -79,8 +79,8 @@ void TUKeyboard::releaseAll() {
 }
 
 void TUKeyboard::sendState() {
-    while (!TUCompositeHID::_usb_hid.ready()) {
+    while (!TUCompositeHID::ready()) {
         tight_loop_contents();
     }
-    TUCompositeHID::_usb_hid.sendReport(_report_id, &_report, sizeof(hid_keyboard_report_t));
+    TUCompositeHID::sendReport(_report_id, &_report, sizeof(hid_keyboard_report_t));
 }
