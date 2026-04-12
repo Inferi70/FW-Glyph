@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 Import("env")
@@ -23,6 +24,27 @@ def register_skip(pattern):
     env.AddBuildMiddleware(skip_adafruit_hid, pattern)
 
 
+def build_tinyusb_core():
+    framework_dir = env.PioPlatform().get_package_dir("framework-arduinopico")
+    tinyusb_src = os.path.join(framework_dir, "pico-sdk", "lib", "tinyusb", "src")
+
+    build_specs = [
+        ("class_cdc", os.path.join(tinyusb_src, "class", "cdc"), "-<*> +<cdc_device.c>"),
+        ("class_hid", os.path.join(tinyusb_src, "class", "hid"), "-<*> +<hid_device.c>"),
+        ("common", os.path.join(tinyusb_src, "common"), "-<*> +<tusb_fifo.c>"),
+        ("device", os.path.join(tinyusb_src, "device"), "-<*> +<usbd.c> +<usbd_control.c>"),
+        (
+            "portable_rp2040",
+            os.path.join(tinyusb_src, "portable", "raspberrypi", "rp2040"),
+            "-<*> +<dcd_rp2040.c> +<rp2040_usb.c>",
+        ),
+        ("root", tinyusb_src, "-<*> +<tusb.c>"),
+    ]
+
+    for name, src_dir, src_filter in build_specs:
+        env.BuildSources(os.path.join("$BUILD_DIR", "TinyUSBCore", name), src_dir, src_filter)
+
+
 def before_build():
     subprocess.run(["git", "config", "--global", "core.longpaths", "true"])
 
@@ -42,6 +64,8 @@ def before_build():
         ("FIRMWARE_VERSION", version_name)
     ])
 
+    build_tinyusb_core()
+
     skip_patterns = [
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/Adafruit_USBD_Device.cpp",
@@ -60,8 +84,10 @@ def before_build():
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/audio/audio_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/bth/bth_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/cdc/cdc_host.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/cdc/cdc_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/dfu/dfu_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/dfu/dfu_rt_device.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/hid/hid_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/hid/hid_host.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/midi/midi_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/msc/msc_device.c",
@@ -71,6 +97,9 @@ def before_build():
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/usbtmc/usbtmc_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/vendor/vendor_device.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/class/video/video_device.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/common/tusb_fifo.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/device/usbd.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/device/usbd_control.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/host/hub.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/host/usbh.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/analog/max3421/hcd_max3421.c",
@@ -78,7 +107,10 @@ def before_build():
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/nordic/nrf5x/dcd_nrf5x.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/raspberrypi/pio_usb/dcd_pio_usb.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/raspberrypi/pio_usb/hcd_pio_usb.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/raspberrypi/rp2040/dcd_rp2040.c",
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/raspberrypi/rp2040/hcd_rp2040.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/portable/raspberrypi/rp2040/rp2040_usb.c",
+        "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/tusb.c",
     ]
 
     for pattern in skip_patterns:
