@@ -79,10 +79,12 @@ Current status:
 - Switch Pro HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - The current host bridge still uses fixed default raw-button mappings rather than a normalized per-device configuration layer.
 - Generic HID fallback parsing is still the next expansion area.
-- Repo-owned host auth scaffolding now exists through `USBHostAuthListener`.
+- Repo-owned host auth detection and transport now exist through `USBHostAuthListener`.
 - The current auth listener can detect PS4-style HID auth devices, P5 auth devices, and XInput 360-class host devices.
-- PS4/P5 feature-report auth requests are now routed through TinyUSB host control transfers in the host-enabled build.
-- This is still scaffolding for passthrough/auth support, not a finished console-auth implementation.
+- PS4/P5 feature-report auth requests are now routed through TinyUSB host HID get/set report helpers in the host-enabled build.
+- `USBHostAuthPassthrough` now provides a repo-owned bridge for future console-facing auth drivers:
+  it queues PS4/P5 feature-report requests, drives the host dongle, and buffers responses back.
+- Full console auth is still not end-to-end in FW-Glyph yet because PS4/PS5 output drivers are not present to consume that bridge.
 
 ### XInput Notes
 
