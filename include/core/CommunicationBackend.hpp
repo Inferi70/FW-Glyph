@@ -3,6 +3,7 @@
 
 #include "core/ControllerMode.hpp"
 #include "core/InputSource.hpp"
+#include "core/InputSourceManager.hpp"
 #include "state.hpp"
 
 class CommunicationBackend {
@@ -28,8 +29,7 @@ class CommunicationBackend {
 
   protected:
     InputState &_inputs;
-    InputSource **_input_sources;
-    size_t _input_source_count;
+    InputSourceManager _input_source_manager;
 
     OutputState _outputs;
     InputMode *_gamemode = nullptr;
