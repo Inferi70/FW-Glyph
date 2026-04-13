@@ -13,6 +13,8 @@ extern "C" {
 void TinyUSB_Device_Init(uint8_t rhport) __attribute__((weak));
 void TinyUSB_Device_Task(void) __attribute__((weak));
 void TinyUSB_Device_FlushCDC(void) __attribute__((weak));
+bool TinyUSB_Port_InitHost(uint8_t rhport) __attribute__((weak));
+void TinyUSB_Port_DeinitHost(uint8_t rhport) __attribute__((weak));
 
 #ifdef __cplusplus
 }

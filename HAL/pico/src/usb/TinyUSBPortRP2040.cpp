@@ -83,6 +83,15 @@ void TinyUSB_Device_Task(void) {
     }
 }
 
+bool TinyUSB_Port_InitHost(uint8_t rhport) {
+    (void)rhport;
+    return false;
+}
+
+void TinyUSB_Port_DeinitHost(uint8_t rhport) {
+    (void)rhport;
+}
+
 }
 
 #endif

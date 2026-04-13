@@ -22,6 +22,7 @@
 #include "stdlib.hpp"
 #include "LEDTemplates.hpp"
 #include "img/update.hpp"
+#include "usb/TinyUSBHostManager.hpp"
 
 #include <Adafruit_SSD1306.h>
 #include <config.pb.h>
@@ -108,6 +109,8 @@ void setup() {
 
     setup_mode_activation_bindings(config.game_mode_configs, config.game_mode_configs_count);
 
+    TinyUSBHostManager::instance().start();
+
     if(backend_count == 0) {
         failed_detection = true;
         backend_count = 1;
@@ -123,6 +126,8 @@ void loop() {
     for (size_t i = 0; i < backend_count; i++) {
         backends[i]->SendReport();
     }
+
+    TinyUSBHostManager::instance().process();
 
     if (current_kb_mode != nullptr) {
         current_kb_mode->SendReport(backends[0]->GetInputs());
