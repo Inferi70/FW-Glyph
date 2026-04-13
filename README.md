@@ -84,7 +84,9 @@ Current status:
 - PS4/P5 feature-report auth requests are now routed through TinyUSB host HID get/set report helpers in the host-enabled build.
 - `USBHostAuthPassthrough` now provides a repo-owned bridge for future console-facing auth drivers:
   it queues PS4/P5 feature-report requests, drives the host dongle, and buffers responses back.
-- Full console auth is still not end-to-end in FW-Glyph yet because PS4/PS5 output drivers are not present to consume that bridge.
+- `PlayStationAuthPassthrough` now provides a repo-owned PS4/P5 auth session layer on top of that bridge:
+  it owns the console-side PS4/P5 auth report flow and sequences the host dongle requests.
+- Full console auth is still not end-to-end in FW-Glyph yet because PS4/PS5 output drivers are not present to consume that session layer.
 
 ### XInput Notes
 

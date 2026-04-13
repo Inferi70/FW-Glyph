@@ -23,6 +23,7 @@
 #include "LEDTemplates.hpp"
 #include "img/update.hpp"
 #include "input/USBHostGamepadInput.hpp"
+#include "usb/PlayStationAuthPassthrough.hpp"
 #include "usb/USBHostAuthPassthrough.hpp"
 #include "usb/TinyUSBHostManager.hpp"
 #include "usb/USBHostAuthListener.hpp"
@@ -138,6 +139,7 @@ void loop() {
 
     TinyUSBHostManager::instance().process();
     USBHostAuthPassthrough::instance().process();
+    PlayStationAuthPassthrough::instance().process();
 
     if (current_kb_mode != nullptr) {
         current_kb_mode->SendReport(backends[0]->GetInputs());
