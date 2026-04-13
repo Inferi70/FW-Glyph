@@ -29,6 +29,10 @@
 extern "C" {
 #endif
 
+#ifndef FW_ENABLE_USB_HOST
+#define FW_ENABLE_USB_HOST 0
+#endif
+
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
@@ -37,8 +41,17 @@ extern "C" {
 // Enable device stack
 #define CFG_TUD_ENABLED 1
 
-// This firmware only uses TinyUSB device mode.
-#define CFG_TUH_ENABLED 0
+#if FW_ENABLE_USB_HOST
+#ifndef BOARD_TUH_RHPORT
+#define BOARD_TUH_RHPORT 1
+#endif
+
+#ifndef BOARD_TUH_MAX_SPEED
+#define BOARD_TUH_MAX_SPEED OPT_MODE_FULL_SPEED
+#endif
+#endif
+
+#define CFG_TUH_ENABLED FW_ENABLE_USB_HOST
 
 #ifndef CFG_TUSB_MCU
 #define CFG_TUSB_MCU OPT_MCU_RP2040
@@ -84,10 +97,22 @@ extern int serial1_printf(const char *__restrict __format, ...);
 // Host Configuration
 //--------------------------------------------------------------------
 
+#if CFG_TUH_ENABLED
+#define CFG_TUH_MAX_SPEED BOARD_TUH_MAX_SPEED
+#define CFG_TUH_ENUMERATION_BUFSIZE 512
+#define CFG_TUH_HUB 1
+#define CFG_TUH_DEVICE_MAX (CFG_TUH_HUB ? 4 : 1)
+#define CFG_TUH_CDC 1
+#define CFG_TUH_HID 4
+#define CFG_TUH_HID_EPIN_BUFSIZE 64
+#define CFG_TUH_HID_EPOUT_BUFSIZE 64
+#else
 #define CFG_TUH_ENUMERATION_BUFSIZE 0
 #define CFG_TUH_HUB 0
 #define CFG_TUH_DEVICE_MAX 0
+#define CFG_TUH_CDC 0
 #define CFG_TUH_HID 0
+#endif
 
 #ifdef __cplusplus
 }

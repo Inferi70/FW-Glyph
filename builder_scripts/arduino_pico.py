@@ -4,6 +4,11 @@ import subprocess
 Import("env")
 
 
+def option_enabled(name, default=False):
+    value = env.GetProjectOption(name, "true" if default else "false")
+    return str(value).lower() in ("1", "true", "yes", "on")
+
+
 def skip_adafruit_hid(node):
     return None
 
@@ -24,7 +29,7 @@ def register_skip(pattern):
     env.AddBuildMiddleware(skip_adafruit_hid, pattern)
 
 
-def build_tinyusb_core():
+def build_tinyusb_core(enable_host=False):
     framework_dir = env.PioPlatform().get_package_dir("framework-arduinopico")
     tinyusb_src = os.path.join(framework_dir, "pico-sdk", "lib", "tinyusb", "src")
 
@@ -40,6 +45,20 @@ def build_tinyusb_core():
         ),
         ("root", tinyusb_src, "-<*> +<tusb.c>"),
     ]
+
+    if enable_host:
+        build_specs.extend(
+            [
+                ("class_cdc_host", os.path.join(tinyusb_src, "class", "cdc"), "-<*> +<cdc_host.c>"),
+                ("class_hid_host", os.path.join(tinyusb_src, "class", "hid"), "-<*> +<hid_host.c>"),
+                ("host", os.path.join(tinyusb_src, "host"), "-<*> +<usbh.c> +<hub.c>"),
+                (
+                    "portable_rp2040_host",
+                    os.path.join(tinyusb_src, "portable", "raspberrypi", "rp2040"),
+                    "-<*> +<hcd_rp2040.c>",
+                ),
+            ]
+        )
 
     for name, src_dir, src_filter in build_specs:
         env.BuildSources(os.path.join("$BUILD_DIR", "TinyUSBCore", name), src_dir, src_filter)
@@ -64,7 +83,11 @@ def before_build():
         ("FIRMWARE_VERSION", version_name)
     ])
 
-    build_tinyusb_core()
+    enable_usb_host = option_enabled("custom_enable_usb_host")
+    if enable_usb_host:
+        env.Append(CPPDEFINES=[("FW_ENABLE_USB_HOST", 1)])
+
+    build_tinyusb_core(enable_usb_host)
 
     skip_patterns = [
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp",
