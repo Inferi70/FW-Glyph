@@ -24,6 +24,7 @@
 #include "img/update.hpp"
 #include "input/USBHostGamepadInput.hpp"
 #include "usb/TinyUSBHostManager.hpp"
+#include "usb/USBHostAuthListener.hpp"
 
 #include <Adafruit_SSD1306.h>
 #include <config.pb.h>
@@ -43,6 +44,7 @@ DebouncedSwitchMatrixInput<num_rows, num_cols> matrix_input(
 );
 
 USBHostGamepadInput usb_host_gamepad_input;
+USBHostAuthListener usb_host_auth_listener;
 
 CommunicationBackend **backends = nullptr;
 size_t backend_count;
@@ -113,6 +115,7 @@ void setup() {
     setup_mode_activation_bindings(config.game_mode_configs, config.game_mode_configs_count);
 
     TinyUSBHostManager::instance().pushListener(&usb_host_gamepad_input);
+    TinyUSBHostManager::instance().pushListener(&usb_host_auth_listener);
     TinyUSBHostManager::instance().start();
 
     if(backend_count == 0) {

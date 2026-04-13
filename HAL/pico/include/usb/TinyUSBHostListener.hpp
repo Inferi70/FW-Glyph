@@ -26,6 +26,14 @@ class TinyUSBHostListener {
         uint16_t len
     ) {}
 
+    virtual void hidSetReportComplete(
+        uint8_t dev_addr,
+        uint8_t instance,
+        uint8_t report_id,
+        uint8_t report_type,
+        uint16_t len
+    ) {}
+
     virtual void xinputMount(
         uint8_t dev_addr,
         uint8_t instance,
