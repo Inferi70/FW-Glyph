@@ -34,6 +34,7 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
         XINPUT,
         DS4_HID,
         DUALSENSE_HID,
+        SWITCH_PRO_HID,
     };
 
     void clearMappedInputs(InputState &inputs);
@@ -41,6 +42,10 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     void resetState();
     void applyDs4Report(const uint8_t *report, uint16_t len);
     void applyDualSenseReport(const uint8_t *report, uint16_t len);
+    void applySwitchProReport(const uint8_t *report, uint16_t len);
+    void startSwitchProInit();
+    void handleSwitchProInitReport(const uint8_t *report, uint16_t len);
+    uint8_t nextSwitchReportCounter();
     void setDpadFromHat(uint8_t hat);
 
     bool _active = false;
@@ -51,6 +56,8 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     uint8_t _type = 0;
     uint16_t _last_vid = 0;
     uint16_t _last_pid = 0;
+    bool _switch_pro_ready = false;
+    uint8_t _switch_report_counter = 0;
 
     bool _dpad_up = false;
     bool _dpad_down = false;

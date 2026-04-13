@@ -32,29 +32,31 @@ def register_skip(pattern):
 def build_tinyusb_core(enable_host=False):
     framework_dir = env.PioPlatform().get_package_dir("framework-arduinopico")
     tinyusb_src = os.path.join(framework_dir, "pico-sdk", "lib", "tinyusb", "src")
+    adafruit_tinyusb_src = os.path.join(framework_dir, "libraries", "Adafruit_TinyUSB_Arduino", "src")
+    core_src = adafruit_tinyusb_src if enable_host else tinyusb_src
 
     build_specs = [
-        ("class_cdc", os.path.join(tinyusb_src, "class", "cdc"), "-<*> +<cdc_device.c>"),
-        ("class_hid", os.path.join(tinyusb_src, "class", "hid"), "-<*> +<hid_device.c>"),
-        ("common", os.path.join(tinyusb_src, "common"), "-<*> +<tusb_fifo.c>"),
-        ("device", os.path.join(tinyusb_src, "device"), "-<*> +<usbd.c> +<usbd_control.c>"),
+        ("class_cdc", os.path.join(core_src, "class", "cdc"), "-<*> +<cdc_device.c>"),
+        ("class_hid", os.path.join(core_src, "class", "hid"), "-<*> +<hid_device.c>"),
+        ("common", os.path.join(core_src, "common"), "-<*> +<tusb_fifo.c>"),
+        ("device", os.path.join(core_src, "device"), "-<*> +<usbd.c> +<usbd_control.c>"),
         (
             "portable_rp2040",
-            os.path.join(tinyusb_src, "portable", "raspberrypi", "rp2040"),
+            os.path.join(core_src, "portable", "raspberrypi", "rp2040"),
             "-<*> +<dcd_rp2040.c> +<rp2040_usb.c>",
         ),
-        ("root", tinyusb_src, "-<*> +<tusb.c>"),
+        ("root", core_src, "-<*> +<tusb.c>"),
     ]
 
     if enable_host:
         build_specs.extend(
             [
-                ("class_cdc_host", os.path.join(tinyusb_src, "class", "cdc"), "-<*> +<cdc_host.c>"),
-                ("class_hid_host", os.path.join(tinyusb_src, "class", "hid"), "-<*> +<hid_host.c>"),
-                ("host", os.path.join(tinyusb_src, "host"), "-<*> +<usbh.c> +<hub.c>"),
+                ("class_cdc_host", os.path.join(adafruit_tinyusb_src, "class", "cdc"), "-<*> +<cdc_host.c>"),
+                ("class_hid_host", os.path.join(adafruit_tinyusb_src, "class", "hid"), "-<*> +<hid_host.c>"),
+                ("host", os.path.join(adafruit_tinyusb_src, "host"), "-<*> +<usbh.c> +<hub.c>"),
                 (
                     "portable_pio_usb_host",
-                    os.path.join(tinyusb_src, "portable", "raspberrypi", "pio_usb"),
+                    os.path.join(adafruit_tinyusb_src, "portable", "raspberrypi", "pio_usb"),
                     "-<*> +<hcd_pio_usb.c>",
                 ),
             ]
@@ -95,7 +97,15 @@ def before_build():
                 ("FW_USB_HOST_DP_PIN", usb_host_dp_pin),
                 ("FW_USB_HOST_PINOUT", usb_host_pinout),
             ],
-            CPPPATH=[os.path.join("$PROJECT_DIR", "third_party", "pico_pio_usb", "src")],
+            CPPPATH=[
+                os.path.join("$PROJECT_DIR", "third_party", "pico_pio_usb", "src"),
+                os.path.join(
+                    env.PioPlatform().get_package_dir("framework-arduinopico"),
+                    "libraries",
+                    "Adafruit_TinyUSB_Arduino",
+                    "src",
+                ),
+            ],
         )
 
     build_tinyusb_core(enable_usb_host)

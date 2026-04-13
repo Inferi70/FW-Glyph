@@ -51,6 +51,12 @@ For `pio run -e glyph_mk6`:
   `framework-arduinopico/pico-sdk/lib/tinyusb/src`
 - The old Adafruit TinyUSB wrapper and port sources are skipped in the build script.
 
+For `pio run -e glyph_mk6_usb_host`:
+
+- Repo-owned host manager, host listeners, XInput host class glue, and RP2040 host port glue are used.
+- Vendored `pico_pio_usb` provides the RP2040 host transport.
+- TinyUSB host-side C sources are built from the framework's vendored `Adafruit_TinyUSB_Arduino/src` tree so HID/XInput host support stays on one internally consistent host API surface.
+
 ### USB Host Direction
 
 The branch also now has the first GP2040-CE-style host scaffolding:
@@ -69,6 +75,7 @@ Current status:
 - XInput host reports are translated into FW-Glyph raw input slots through `USBHostGamepadInput`.
 - DS4-class HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - DualSense HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
+- Switch Pro HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - The current host bridge still uses fixed default raw-button mappings rather than a normalized per-device configuration layer.
 - Generic HID fallback parsing is still the next expansion area.
 - Repo-owned host auth scaffolding now exists through `USBHostAuthListener`.
