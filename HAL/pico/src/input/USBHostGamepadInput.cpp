@@ -8,6 +8,10 @@
 
 namespace {
 
+constexpr uint16_t SONY_VENDOR_ID = 0x054C;
+constexpr uint16_t DS4_PRODUCT_ID = 0x09CC;
+constexpr uint16_t DS4_ORG_PRODUCT_ID = 0x05C4;
+
 constexpr uint8_t XBOX_MASK_UP = 0x01;
 constexpr uint8_t XBOX_MASK_DOWN = 0x02;
 constexpr uint8_t XBOX_MASK_LEFT = 0x04;
@@ -28,6 +32,15 @@ constexpr uint8_t XBOX_MASK_Y = 0x80;
 constexpr uint8_t TRIGGER_THRESHOLD = 32;
 constexpr int16_t STICK_DIGITAL_THRESHOLD = 8192;
 
+constexpr uint8_t PS4_HAT_UP = 0x00;
+constexpr uint8_t PS4_HAT_UPRIGHT = 0x01;
+constexpr uint8_t PS4_HAT_RIGHT = 0x02;
+constexpr uint8_t PS4_HAT_DOWNRIGHT = 0x03;
+constexpr uint8_t PS4_HAT_DOWN = 0x04;
+constexpr uint8_t PS4_HAT_DOWNLEFT = 0x05;
+constexpr uint8_t PS4_HAT_LEFT = 0x06;
+constexpr uint8_t PS4_HAT_UPLEFT = 0x07;
+
 typedef struct __attribute__((packed)) {
     uint8_t report_id;
     uint8_t report_size;
@@ -41,6 +54,32 @@ typedef struct __attribute__((packed)) {
     int16_t ry;
     uint8_t reserved[6];
 } xinput_host_report_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t report_id;
+    uint8_t left_stick_x;
+    uint8_t left_stick_y;
+    uint8_t right_stick_x;
+    uint8_t right_stick_y;
+    uint8_t dpad : 4;
+    uint16_t button_west : 1;
+    uint16_t button_south : 1;
+    uint16_t button_east : 1;
+    uint16_t button_north : 1;
+    uint16_t button_l1 : 1;
+    uint16_t button_r1 : 1;
+    uint16_t button_l2 : 1;
+    uint16_t button_r2 : 1;
+    uint16_t button_select : 1;
+    uint16_t button_start : 1;
+    uint16_t button_l3 : 1;
+    uint16_t button_r3 : 1;
+    uint16_t button_home : 1;
+    uint16_t button_touchpad : 1;
+    uint8_t report_counter : 6;
+    uint8_t left_trigger;
+    uint8_t right_trigger;
+} ds4_host_report_t;
 
 uint8_t axis_to_uint8(int16_t value, bool invert = false) {
     uint16_t shifted = static_cast<uint16_t>(value - INT16_MIN);
@@ -68,46 +107,88 @@ void USBHostGamepadInput::UpdateInputs(InputState &inputs) {
     }
 }
 
+void USBHostGamepadInput::mount(uint8_t dev_addr, uint16_t vid, uint16_t pid) {
+    _last_vid = 0;
+    _last_pid = 0;
+
+    if (!_active || _dev_addr == dev_addr) {
+        _last_vid = vid;
+        _last_pid = pid;
+    }
+}
+
 void USBHostGamepadInput::unmount(uint8_t dev_addr) {
     if (dev_addr != _dev_addr) {
         return;
     }
 
     _active = false;
+    _source = SourceType::NONE;
     _dev_addr = 0;
     _instance = 0;
     _type = 0;
+    _last_vid = 0;
+    _last_pid = 0;
+}
+
+void USBHostGamepadInput::hidMount(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *desc_report,
+    uint16_t desc_len
+) {
+    (void) desc_report;
+    (void) desc_len;
+
+    if (_active) {
+        return;
+    }
+
+    if (_last_vid != SONY_VENDOR_ID || (_last_pid != DS4_PRODUCT_ID && _last_pid != DS4_ORG_PRODUCT_ID)) {
+        return;
+    }
+
+    _active = true;
+    _source = SourceType::DS4_HID;
+    _dev_addr = dev_addr;
+    _instance = instance;
+    _type = 0;
+    resetState();
+}
+
+void USBHostGamepadInput::hidUnmount(uint8_t dev_addr, uint8_t instance) {
+    if (!_active || _source != SourceType::DS4_HID || dev_addr != _dev_addr || instance != _instance) {
+        return;
+    }
+
+    _active = false;
+    _source = SourceType::NONE;
+    _dev_addr = 0;
+    _instance = 0;
+}
+
+void USBHostGamepadInput::hidReportReceived(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *report,
+    uint16_t len
+) {
+    if (!_active || _source != SourceType::DS4_HID || dev_addr != _dev_addr || instance != _instance) {
+        return;
+    }
+
+    applyDs4Report(report, len);
 }
 
 void USBHostGamepadInput::xinputMount(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
     (void) subtype;
 
     _active = true;
+    _source = SourceType::XINPUT;
     _dev_addr = dev_addr;
     _instance = instance;
     _type = type;
-
-    _dpad_up = false;
-    _dpad_down = false;
-    _dpad_left = false;
-    _dpad_right = false;
-    _start = false;
-    _back = false;
-    _ls = false;
-    _rs = false;
-    _lb = false;
-    _rb = false;
-    _home = false;
-    _a = false;
-    _b = false;
-    _x = false;
-    _y = false;
-    _lt = 0;
-    _rt = 0;
-    _lx = 128;
-    _ly = 128;
-    _rx = 128;
-    _ry = 128;
+    resetState();
 
     #if CFG_TUH_ENABLED && CFG_TUH_XINPUT
     if (_type == XINPUT_HOST_XBOX360 || _type == XINPUT_HOST_XBOXONE) {
@@ -122,6 +203,7 @@ void USBHostGamepadInput::xinputUnmount(uint8_t dev_addr, uint8_t instance) {
     }
 
     _active = false;
+    _source = SourceType::NONE;
     _dev_addr = 0;
     _instance = 0;
     _type = 0;
@@ -134,6 +216,10 @@ void USBHostGamepadInput::xinputReportReceived(
     uint16_t len
 ) {
     if (!_active || dev_addr != _dev_addr || instance != _instance) {
+        return;
+    }
+
+    if (_source != SourceType::XINPUT) {
         return;
     }
 
@@ -172,6 +258,102 @@ void USBHostGamepadInput::xinputReportReceived(
     #if CFG_TUH_ENABLED && CFG_TUH_XINPUT
     tuh_xinput_receive_report(dev_addr, instance);
     #endif
+}
+
+void USBHostGamepadInput::resetState() {
+    _dpad_up = false;
+    _dpad_down = false;
+    _dpad_left = false;
+    _dpad_right = false;
+    _start = false;
+    _back = false;
+    _ls = false;
+    _rs = false;
+    _lb = false;
+    _rb = false;
+    _home = false;
+    _a = false;
+    _b = false;
+    _x = false;
+    _y = false;
+    _lt = 0;
+    _rt = 0;
+    _lx = 128;
+    _ly = 128;
+    _rx = 128;
+    _ry = 128;
+}
+
+void USBHostGamepadInput::setDpadFromHat(uint8_t hat) {
+    _dpad_up = false;
+    _dpad_down = false;
+    _dpad_left = false;
+    _dpad_right = false;
+
+    switch (hat) {
+        case PS4_HAT_UP:
+            _dpad_up = true;
+            break;
+        case PS4_HAT_UPRIGHT:
+            _dpad_up = true;
+            _dpad_right = true;
+            break;
+        case PS4_HAT_RIGHT:
+            _dpad_right = true;
+            break;
+        case PS4_HAT_DOWNRIGHT:
+            _dpad_down = true;
+            _dpad_right = true;
+            break;
+        case PS4_HAT_DOWN:
+            _dpad_down = true;
+            break;
+        case PS4_HAT_DOWNLEFT:
+            _dpad_down = true;
+            _dpad_left = true;
+            break;
+        case PS4_HAT_LEFT:
+            _dpad_left = true;
+            break;
+        case PS4_HAT_UPLEFT:
+            _dpad_up = true;
+            _dpad_left = true;
+            break;
+        default:
+            break;
+    }
+}
+
+void USBHostGamepadInput::applyDs4Report(const uint8_t *report, uint16_t len) {
+    if (len < sizeof(ds4_host_report_t)) {
+        return;
+    }
+
+    ds4_host_report_t ds4_report = {};
+    memcpy(&ds4_report, report, sizeof(ds4_report));
+
+    if (ds4_report.report_id != 0x01) {
+        return;
+    }
+
+    setDpadFromHat(ds4_report.dpad);
+    _start = ds4_report.button_start;
+    _back = ds4_report.button_select;
+    _ls = ds4_report.button_l3;
+    _rs = ds4_report.button_r3;
+    _lb = ds4_report.button_l1;
+    _rb = ds4_report.button_r1;
+    _home = ds4_report.button_home;
+    _a = ds4_report.button_south;
+    _b = ds4_report.button_east;
+    _x = ds4_report.button_west;
+    _y = ds4_report.button_north;
+    _lt = ds4_report.left_trigger;
+    _rt = ds4_report.right_trigger;
+    _lx = ds4_report.left_stick_x;
+    _ly = static_cast<uint8_t>(~ds4_report.left_stick_y);
+    _rx = ds4_report.right_stick_x;
+    _ry = static_cast<uint8_t>(~ds4_report.right_stick_y);
 }
 
 void USBHostGamepadInput::clearMappedInputs(InputState &inputs) {

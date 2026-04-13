@@ -67,8 +67,9 @@ Current status:
 - Device builds still pass.
 - Repo-owned host input plumbing now includes a first host-backed input source.
 - XInput host reports are translated into FW-Glyph raw input slots through `USBHostGamepadInput`.
-- That bridge is currently XInput-first and uses a fixed default raw-button mapping.
-- Generic HID host parsing is still the next expansion area.
+- DS4-class HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
+- The current host bridge still uses fixed default raw-button mappings rather than a normalized per-device configuration layer.
+- Generic HID fallback parsing is still the next expansion area.
 - Repo-owned host auth scaffolding now exists through `USBHostAuthListener`.
 - The current auth listener can detect PS4-style HID auth devices, P5 auth devices, and XInput 360-class host devices.
 - PS4/P5 feature-report auth requests are now routed through TinyUSB host control transfers in the host-enabled build.
