@@ -65,8 +65,10 @@ Current status:
 
 - Host builds pass.
 - Device builds still pass.
-- Hosted controller input is not yet mapped into FW-Glyph gameplay state.
-- The next step is a host-backed input listener/source that consumes HID and XInput host reports and feeds `InputSourceManager`.
+- Repo-owned host input plumbing now includes a first host-backed input source.
+- XInput host reports are translated into FW-Glyph raw input slots through `USBHostGamepadInput`.
+- That bridge is currently XInput-first and uses a fixed default raw-button mapping.
+- Generic HID host parsing is still the next expansion area.
 
 ### XInput Notes
 

@@ -22,6 +22,7 @@
 #include "stdlib.hpp"
 #include "LEDTemplates.hpp"
 #include "img/update.hpp"
+#include "input/USBHostGamepadInput.hpp"
 #include "usb/TinyUSBHostManager.hpp"
 
 #include <Adafruit_SSD1306.h>
@@ -41,13 +42,15 @@ DebouncedSwitchMatrixInput<num_rows, num_cols> matrix_input(
     DiodeDirection::COL2ROW
 );
 
+USBHostGamepadInput usb_host_gamepad_input;
+
 CommunicationBackend **backends = nullptr;
 size_t backend_count;
 KeyboardMode *current_kb_mode = nullptr;
 
 InputState inputs;
 
-InputSource *input_sources[] = { &matrix_input };
+InputSource *input_sources[] = { &matrix_input, &usb_host_gamepad_input };
 size_t input_source_count = sizeof(input_sources) / sizeof(InputSource *);
 
 Adafruit_SSD1306 display(128, 64, &OLED_WIRE_INSTANCE);
@@ -109,6 +112,7 @@ void setup() {
 
     setup_mode_activation_bindings(config.game_mode_configs, config.game_mode_configs_count);
 
+    TinyUSBHostManager::instance().pushListener(&usb_host_gamepad_input);
     TinyUSBHostManager::instance().start();
 
     if(backend_count == 0) {
