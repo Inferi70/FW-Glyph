@@ -11,6 +11,7 @@ namespace {
 constexpr uint16_t SONY_VENDOR_ID = 0x054C;
 constexpr uint16_t DS4_PRODUCT_ID = 0x09CC;
 constexpr uint16_t DS4_ORG_PRODUCT_ID = 0x05C4;
+constexpr uint16_t DUALSENSE_PRODUCT_ID = 0x0CE6;
 
 constexpr uint8_t XBOX_MASK_UP = 0x01;
 constexpr uint8_t XBOX_MASK_DOWN = 0x02;
@@ -81,6 +82,34 @@ typedef struct __attribute__((packed)) {
     uint8_t right_trigger;
 } ds4_host_report_t;
 
+typedef struct __attribute__((packed)) {
+    uint8_t report_id;
+    uint8_t left_stick_x;
+    uint8_t left_stick_y;
+    uint8_t right_stick_x;
+    uint8_t right_stick_y;
+    uint8_t left_trigger;
+    uint8_t right_trigger;
+    uint8_t report_counter;
+    uint8_t dpad : 4;
+    uint16_t button_west : 1;
+    uint16_t button_south : 1;
+    uint16_t button_east : 1;
+    uint16_t button_north : 1;
+    uint16_t button_l1 : 1;
+    uint16_t button_r1 : 1;
+    uint16_t button_l2 : 1;
+    uint16_t button_r2 : 1;
+    uint16_t button_select : 1;
+    uint16_t button_start : 1;
+    uint16_t button_l3 : 1;
+    uint16_t button_r3 : 1;
+    uint16_t button_home : 1;
+    uint16_t button_touchpad : 1;
+    uint16_t button_mic_mute : 1;
+    uint8_t misc_data[54];
+} dualsense_host_report_t;
+
 uint8_t axis_to_uint8(int16_t value, bool invert = false) {
     uint16_t shifted = static_cast<uint16_t>(value - INT16_MIN);
     uint8_t axis = static_cast<uint8_t>(shifted >> 8);
@@ -144,12 +173,13 @@ void USBHostGamepadInput::hidMount(
         return;
     }
 
-    if (_last_vid != SONY_VENDOR_ID || (_last_pid != DS4_PRODUCT_ID && _last_pid != DS4_ORG_PRODUCT_ID)) {
+    if (_last_vid != SONY_VENDOR_ID ||
+        (_last_pid != DS4_PRODUCT_ID && _last_pid != DS4_ORG_PRODUCT_ID && _last_pid != DUALSENSE_PRODUCT_ID)) {
         return;
     }
 
     _active = true;
-    _source = SourceType::DS4_HID;
+    _source = (_last_pid == DUALSENSE_PRODUCT_ID) ? SourceType::DUALSENSE_HID : SourceType::DS4_HID;
     _dev_addr = dev_addr;
     _instance = instance;
     _type = 0;
@@ -157,7 +187,8 @@ void USBHostGamepadInput::hidMount(
 }
 
 void USBHostGamepadInput::hidUnmount(uint8_t dev_addr, uint8_t instance) {
-    if (!_active || _source != SourceType::DS4_HID || dev_addr != _dev_addr || instance != _instance) {
+    if (!_active || (_source != SourceType::DS4_HID && _source != SourceType::DUALSENSE_HID) ||
+        dev_addr != _dev_addr || instance != _instance) {
         return;
     }
 
@@ -173,11 +204,16 @@ void USBHostGamepadInput::hidReportReceived(
     const uint8_t *report,
     uint16_t len
 ) {
-    if (!_active || _source != SourceType::DS4_HID || dev_addr != _dev_addr || instance != _instance) {
+    if (!_active || (_source != SourceType::DS4_HID && _source != SourceType::DUALSENSE_HID) ||
+        dev_addr != _dev_addr || instance != _instance) {
         return;
     }
 
-    applyDs4Report(report, len);
+    if (_source == SourceType::DUALSENSE_HID) {
+        applyDualSenseReport(report, len);
+    } else {
+        applyDs4Report(report, len);
+    }
 }
 
 void USBHostGamepadInput::xinputMount(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
@@ -354,6 +390,38 @@ void USBHostGamepadInput::applyDs4Report(const uint8_t *report, uint16_t len) {
     _ly = static_cast<uint8_t>(~ds4_report.left_stick_y);
     _rx = ds4_report.right_stick_x;
     _ry = static_cast<uint8_t>(~ds4_report.right_stick_y);
+}
+
+void USBHostGamepadInput::applyDualSenseReport(const uint8_t *report, uint16_t len) {
+    if (len < sizeof(dualsense_host_report_t)) {
+        return;
+    }
+
+    dualsense_host_report_t dualsense_report = {};
+    memcpy(&dualsense_report, report, sizeof(dualsense_report));
+
+    if (dualsense_report.report_id != 0x01) {
+        return;
+    }
+
+    setDpadFromHat(dualsense_report.dpad);
+    _start = dualsense_report.button_start;
+    _back = dualsense_report.button_select;
+    _ls = dualsense_report.button_l3;
+    _rs = dualsense_report.button_r3;
+    _lb = dualsense_report.button_l1;
+    _rb = dualsense_report.button_r1;
+    _home = dualsense_report.button_home;
+    _a = dualsense_report.button_south;
+    _b = dualsense_report.button_east;
+    _x = dualsense_report.button_west;
+    _y = dualsense_report.button_north;
+    _lt = dualsense_report.left_trigger;
+    _rt = dualsense_report.right_trigger;
+    _lx = dualsense_report.left_stick_x;
+    _ly = static_cast<uint8_t>(~dualsense_report.left_stick_y);
+    _rx = dualsense_report.right_stick_x;
+    _ry = static_cast<uint8_t>(~dualsense_report.right_stick_y);
 }
 
 void USBHostGamepadInput::clearMappedInputs(InputState &inputs) {

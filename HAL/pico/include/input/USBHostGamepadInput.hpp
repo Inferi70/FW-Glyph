@@ -33,12 +33,14 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
         NONE = 0,
         XINPUT,
         DS4_HID,
+        DUALSENSE_HID,
     };
 
     void clearMappedInputs(InputState &inputs);
     void applyXInputState(InputState &inputs);
     void resetState();
     void applyDs4Report(const uint8_t *report, uint16_t len);
+    void applyDualSenseReport(const uint8_t *report, uint16_t len);
     void setDpadFromHat(uint8_t hat);
 
     bool _active = false;

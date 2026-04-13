@@ -68,6 +68,7 @@ Current status:
 - Repo-owned host input plumbing now includes a first host-backed input source.
 - XInput host reports are translated into FW-Glyph raw input slots through `USBHostGamepadInput`.
 - DS4-class HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
+- DualSense HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - The current host bridge still uses fixed default raw-button mappings rather than a normalized per-device configuration layer.
 - Generic HID fallback parsing is still the next expansion area.
 - Repo-owned host auth scaffolding now exists through `USBHostAuthListener`.
