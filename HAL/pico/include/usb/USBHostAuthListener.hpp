@@ -2,7 +2,6 @@
 #define _USB_USB_HOST_AUTH_LISTENER_HPP
 
 #include "usb/TinyUSBHostListener.hpp"
-#include "tusb.h"
 
 enum class USBHostAuthDeviceType {
     NONE = 0,
@@ -53,8 +52,8 @@ class USBHostAuthListener : public TinyUSBHostListener {
     bool sendP5AuthPayload(const uint8_t *payload, uint16_t len);
 
   private:
-    bool hidGetReport(uint8_t report_id, void *report, uint16_t len);
-    bool hidSetReport(uint8_t report_id, void *report, uint16_t len);
+    bool hostGetReport(uint8_t report_id, void *report, uint16_t len);
+    bool hostSetReport(uint8_t report_id, void *report, uint16_t len);
     void clear();
 
     USBHostAuthDeviceType _device_type = USBHostAuthDeviceType::NONE;
@@ -64,7 +63,7 @@ class USBHostAuthListener : public TinyUSBHostListener {
     bool _busy = false;
     uint8_t _last_report_id = 0;
     uint16_t _last_len = 0;
-    tusb_control_request_t _last_request = {};
+    bool _awaiting_cb = false;
     uint8_t _last_buffer[64] = {};
 };
 

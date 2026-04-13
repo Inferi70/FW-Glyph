@@ -7,6 +7,8 @@
 
 #if CFG_TUH_ENABLED
 
+#include "third_party/tinyusb_gp2040/src/class/hid/hid_host.h"
+
 namespace {
 
 constexpr uint16_t P5_VENDOR_ID = 0x2B81;
@@ -66,6 +68,7 @@ void USBHostAuthListener::clear() {
     _instance = 0xFF;
     _interface_number = 0xFF;
     _busy = false;
+    _awaiting_cb = false;
     _last_report_id = 0;
     _last_len = 0;
     memset(_last_buffer, 0, sizeof(_last_buffer));
@@ -147,6 +150,7 @@ void USBHostAuthListener::hidSetReportComplete(
 
     (void) report_type;
     _busy = false;
+    _awaiting_cb = false;
     _last_report_id = report_id;
     _last_len = len;
 }
@@ -164,16 +168,18 @@ void USBHostAuthListener::hidGetReportComplete(
 
     (void) report_type;
     _busy = false;
+    _awaiting_cb = false;
     _last_report_id = report_id;
     _last_len = len;
 }
 
-bool USBHostAuthListener::hidGetReport(uint8_t report_id, void *report, uint16_t len) {
-    if (!available() || _busy || len > sizeof(_last_buffer) || _interface_number == 0xFF) {
+bool USBHostAuthListener::hostGetReport(uint8_t report_id, void *report, uint16_t len) {
+    if (!available() || _busy || _awaiting_cb || len > sizeof(_last_buffer)) {
         return false;
     }
 
     _busy = true;
+    _awaiting_cb = true;
     _last_report_id = report_id;
     _last_len = len;
     memset(_last_buffer, 0, sizeof(_last_buffer));
@@ -181,36 +187,21 @@ bool USBHostAuthListener::hidGetReport(uint8_t report_id, void *report, uint16_t
         memcpy(_last_buffer, report, len);
     }
 
-    _last_request = {};
-    _last_request.bmRequestType_bit.recipient = TUSB_REQ_RCPT_INTERFACE;
-    _last_request.bmRequestType_bit.type = TUSB_REQ_TYPE_CLASS;
-    _last_request.bmRequestType_bit.direction = TUSB_DIR_IN;
-    _last_request.bRequest = HID_REQ_CONTROL_GET_REPORT;
-    _last_request.wValue = tu_u16(HID_REPORT_TYPE_FEATURE, report_id);
-    _last_request.wIndex = _interface_number;
-    _last_request.wLength = len;
-
-    tuh_xfer_t xfer = {};
-    xfer.daddr = _dev_addr;
-    xfer.ep_addr = 0;
-    xfer.setup = &_last_request;
-    xfer.buffer = _last_buffer;
-    xfer.complete_cb = nullptr;
-    xfer.user_data = 0;
-
-    bool ok = tuh_control_xfer(&xfer);
+    bool ok = tuh_hid_get_report(_dev_addr, _instance, report_id, HID_REPORT_TYPE_FEATURE, _last_buffer, len);
     if (!ok) {
         _busy = false;
+        _awaiting_cb = false;
     }
     return ok;
 }
 
-bool USBHostAuthListener::hidSetReport(uint8_t report_id, void *report, uint16_t len) {
-    if (!available() || _busy) {
+bool USBHostAuthListener::hostSetReport(uint8_t report_id, void *report, uint16_t len) {
+    if (!available() || _busy || _awaiting_cb) {
         return false;
     }
 
     _busy = true;
+    _awaiting_cb = true;
     _last_report_id = report_id;
     _last_len = len;
 
@@ -222,6 +213,7 @@ bool USBHostAuthListener::hidSetReport(uint8_t report_id, void *report, uint16_t
     bool ok = tuh_hid_set_report(_dev_addr, _instance, report_id, HID_REPORT_TYPE_FEATURE, _last_buffer, len);
     if (!ok) {
         _busy = false;
+        _awaiting_cb = false;
     }
     return ok;
 }
@@ -232,7 +224,7 @@ bool USBHostAuthListener::requestPS4Definition() {
     }
 
     _last_buffer[0] = PS4_REPORT_DEFINITION;
-    return hidGetReport(PS4_REPORT_DEFINITION, _last_buffer, 48);
+    return hostGetReport(PS4_REPORT_DEFINITION, _last_buffer, 48);
 }
 
 bool USBHostAuthListener::requestPS4ResetAuth() {
@@ -243,7 +235,7 @@ bool USBHostAuthListener::requestPS4ResetAuth() {
     _last_buffer[0] = PS4_REPORT_RESET_AUTH;
     _last_buffer[1] = 0x38;
     _last_buffer[2] = 0x38;
-    return hidGetReport(PS4_REPORT_RESET_AUTH, _last_buffer, 8);
+    return hostGetReport(PS4_REPORT_RESET_AUTH, _last_buffer, 8);
 }
 
 bool USBHostAuthListener::requestPS4SigningState() {
@@ -252,7 +244,7 @@ bool USBHostAuthListener::requestPS4SigningState() {
     }
 
     _last_buffer[0] = PS4_REPORT_GET_SIGNING_STATE;
-    return hidGetReport(PS4_REPORT_GET_SIGNING_STATE, _last_buffer, 16);
+    return hostGetReport(PS4_REPORT_GET_SIGNING_STATE, _last_buffer, 16);
 }
 
 bool USBHostAuthListener::requestPS4SignatureNonce(uint8_t nonce_id, uint8_t nonce_chunk) {
@@ -263,7 +255,7 @@ bool USBHostAuthListener::requestPS4SignatureNonce(uint8_t nonce_id, uint8_t non
     _last_buffer[0] = PS4_REPORT_GET_SIGNATURE_NONCE;
     _last_buffer[1] = nonce_id;
     _last_buffer[2] = nonce_chunk;
-    return hidGetReport(PS4_REPORT_GET_SIGNATURE_NONCE, _last_buffer, 64);
+    return hostGetReport(PS4_REPORT_GET_SIGNATURE_NONCE, _last_buffer, 64);
 }
 
 bool USBHostAuthListener::sendPS4AuthPayload(const uint8_t *payload, uint16_t len) {
@@ -272,7 +264,7 @@ bool USBHostAuthListener::sendPS4AuthPayload(const uint8_t *payload, uint16_t le
     }
 
     memcpy(_last_buffer, payload, len);
-    return hidSetReport(PS4_REPORT_SET_AUTH_PAYLOAD, _last_buffer, len);
+    return hostSetReport(PS4_REPORT_SET_AUTH_PAYLOAD, _last_buffer, len);
 }
 
 bool USBHostAuthListener::requestP5SignatureNonce(uint16_t len) {
@@ -280,7 +272,7 @@ bool USBHostAuthListener::requestP5SignatureNonce(uint16_t len) {
         return false;
     }
 
-    return hidGetReport(P5_REPORT_GET_SIGNATURE_NONCE, _last_buffer, len);
+    return hostGetReport(P5_REPORT_GET_SIGNATURE_NONCE, _last_buffer, len);
 }
 
 bool USBHostAuthListener::requestP5SigningState(uint16_t len) {
@@ -288,7 +280,7 @@ bool USBHostAuthListener::requestP5SigningState(uint16_t len) {
         return false;
     }
 
-    return hidGetReport(P5_REPORT_GET_SIGNING_STATE, _last_buffer, len);
+    return hostGetReport(P5_REPORT_GET_SIGNING_STATE, _last_buffer, len);
 }
 
 bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len) {
@@ -297,7 +289,7 @@ bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len
     }
 
     memcpy(_last_buffer, payload, len);
-    return hidSetReport(P5_REPORT_SET_AUTH_PAYLOAD, _last_buffer, len);
+    return hostSetReport(P5_REPORT_SET_AUTH_PAYLOAD, _last_buffer, len);
 }
 
 #else
@@ -432,14 +424,14 @@ bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len
     return false;
 }
 
-bool USBHostAuthListener::hidGetReport(uint8_t report_id, void *report, uint16_t len) {
+bool USBHostAuthListener::hostGetReport(uint8_t report_id, void *report, uint16_t len) {
     (void) report_id;
     (void) report;
     (void) len;
     return false;
 }
 
-bool USBHostAuthListener::hidSetReport(uint8_t report_id, void *report, uint16_t len) {
+bool USBHostAuthListener::hostSetReport(uint8_t report_id, void *report, uint16_t len) {
     (void) report_id;
     (void) report;
     (void) len;
