@@ -15,6 +15,11 @@ extern "C" {
 #include "arduino/Adafruit_TinyUSB_API.h"
 #include "tusb.h"
 
+#if CFG_TUH_ENABLED
+#include "host/usbh.h"
+#include "pio_usb.h"
+#endif
+
 #if (PICO_SDK_VERSION_MAJOR * 100 + PICO_SDK_VERSION_MINOR) < 104
 #define USB_TASK_IRQ 31
 #else
@@ -85,11 +90,28 @@ void TinyUSB_Device_Task(void) {
 
 bool TinyUSB_Port_InitHost(uint8_t rhport) {
     (void)rhport;
+#if CFG_TUH_ENABLED
+    static pio_usb_configuration_t host_cfg = PIO_USB_DEFAULT_CONFIG;
+
+#ifdef FW_USB_HOST_DP_PIN
+    host_cfg.pin_dp = FW_USB_HOST_DP_PIN;
+#endif
+
+#ifdef FW_USB_HOST_PINOUT
+    host_cfg.pinout = static_cast<PIO_USB_PINOUT>(FW_USB_HOST_PINOUT);
+#endif
+
+    return tuh_configure(rhport, TUH_CFGID_RPI_PIO_USB_CONFIGURATION, &host_cfg);
+#else
     return false;
+#endif
 }
 
 void TinyUSB_Port_DeinitHost(uint8_t rhport) {
     (void)rhport;
+#if CFG_TUH_ENABLED
+    pio_usb_host_stop();
+#endif
 }
 
 }

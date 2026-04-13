@@ -53,9 +53,9 @@ def build_tinyusb_core(enable_host=False):
                 ("class_hid_host", os.path.join(tinyusb_src, "class", "hid"), "-<*> +<hid_host.c>"),
                 ("host", os.path.join(tinyusb_src, "host"), "-<*> +<usbh.c> +<hub.c>"),
                 (
-                    "portable_rp2040_host",
-                    os.path.join(tinyusb_src, "portable", "raspberrypi", "rp2040"),
-                    "-<*> +<hcd_rp2040.c>",
+                    "portable_pio_usb_host",
+                    os.path.join(tinyusb_src, "portable", "raspberrypi", "pio_usb"),
+                    "-<*> +<hcd_pio_usb.c>",
                 ),
             ]
         )
@@ -85,9 +85,27 @@ def before_build():
 
     enable_usb_host = option_enabled("custom_enable_usb_host")
     if enable_usb_host:
-        env.Append(CPPDEFINES=[("FW_ENABLE_USB_HOST", 1)])
+        usb_host_dp_pin = int(env.GetProjectOption("custom_usb_host_dp_pin", "0"))
+        usb_host_pinout_option = str(env.GetProjectOption("custom_usb_host_pinout", "dpdm")).lower()
+        usb_host_pinout = "PIO_USB_PINOUT_DMDP" if usb_host_pinout_option == "dmdp" else "PIO_USB_PINOUT_DPDM"
+
+        env.Append(
+            CPPDEFINES=[
+                ("FW_ENABLE_USB_HOST", 1),
+                ("FW_USB_HOST_DP_PIN", usb_host_dp_pin),
+                ("FW_USB_HOST_PINOUT", usb_host_pinout),
+            ],
+            CPPPATH=[os.path.join("$PROJECT_DIR", "third_party", "pico_pio_usb", "src")],
+        )
 
     build_tinyusb_core(enable_usb_host)
+
+    if enable_usb_host:
+        env.BuildSources(
+            os.path.join("$BUILD_DIR", "TinyUSBHostPort"),
+            os.path.join("$PROJECT_DIR", "third_party", "pico_pio_usb", "src"),
+            "-<*> +<interval_override.c> +<pio_usb.c> +<pio_usb_host.c> +<usb_crc.c>",
+        )
 
     skip_patterns = [
         "*framework-arduinopico/libraries/Adafruit_TinyUSB_Arduino/src/arduino/hid/Adafruit_USBD_HID.cpp",

@@ -49,6 +49,8 @@ extern "C" {
 #ifndef BOARD_TUH_MAX_SPEED
 #define BOARD_TUH_MAX_SPEED OPT_MODE_FULL_SPEED
 #endif
+
+#define CFG_TUH_RPI_PIO_USB 1
 #endif
 
 #define CFG_TUH_ENABLED FW_ENABLE_USB_HOST

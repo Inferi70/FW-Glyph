@@ -3,6 +3,11 @@
 #include "arduino/Adafruit_TinyUSB_API.h"
 #include "tusb.h"
 
+extern "C" {
+bool TinyUSB_Port_InitHost(uint8_t rhport);
+void TinyUSB_Port_DeinitHost(uint8_t rhport);
+}
+
 TinyUSBHostManager &TinyUSBHostManager::instance() {
     static TinyUSBHostManager manager;
     return manager;
