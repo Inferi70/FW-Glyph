@@ -30,6 +30,13 @@ class TinyUSBHostManager {
         uint8_t report_type,
         uint16_t len
     );
+    void hidGetReportComplete(
+        uint8_t dev_addr,
+        uint8_t instance,
+        uint8_t report_id,
+        uint8_t report_type,
+        uint16_t len
+    );
     void xinputMount(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype);
     void xinputUnmount(uint8_t dev_addr, uint8_t instance);
     void xinputReportReceived(uint8_t dev_addr, uint8_t instance, const uint8_t *report, uint16_t len);

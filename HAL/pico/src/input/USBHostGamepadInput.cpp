@@ -198,6 +198,18 @@ InputScanSpeed USBHostGamepadInput::ScanSpeed() {
     return InputScanSpeed::FAST;
 }
 
+void USBHostGamepadInput::setup() {
+    _active = false;
+    _applied_last_update = false;
+    _source = SourceType::NONE;
+    _dev_addr = 0;
+    _instance = 0;
+    _type = 0;
+    _last_vid = 0;
+    _last_pid = 0;
+    resetState();
+}
+
 void USBHostGamepadInput::UpdateInputs(InputState &inputs) {
     if (_active) {
         clearMappedInputs(inputs);
@@ -517,9 +529,7 @@ void USBHostGamepadInput::applyDualSenseReport(const uint8_t *report, uint16_t l
 }
 
 void USBHostGamepadInput::startSwitchProInit() {
-#if CFG_TUH_ENABLED
-    tuh_hid_send_report(_dev_addr, _instance, 0, SWITCH_INIT_REPORT, sizeof(SWITCH_INIT_REPORT));
-#endif
+    (void) hostSendReport(0, SWITCH_INIT_REPORT, sizeof(SWITCH_INIT_REPORT));
 }
 
 uint8_t USBHostGamepadInput::nextSwitchReportCounter() {
@@ -538,29 +548,34 @@ void USBHostGamepadInput::handleSwitchProInitReport(const uint8_t *report, uint1
     };
 
     if (len < 2 || report[0] != SWITCH_REPORT_USB_INPUT_81) {
-#if CFG_TUH_ENABLED
-        tuh_hid_send_report(_dev_addr, _instance, 0, SWITCH_INIT_REPORT, sizeof(SWITCH_INIT_REPORT));
-#endif
+        (void) hostSendReport(0, SWITCH_INIT_REPORT, sizeof(SWITCH_INIT_REPORT));
         return;
     }
 
     if (report[1] == SWITCH_SUBCMD_IDENTIFY) {
         out_report.counter = SWITCH_SUBCMD_HANDSHAKE;
-#if CFG_TUH_ENABLED
         (void) nextSwitchReportCounter();
-        tuh_hid_send_report(_dev_addr, _instance, 0, &out_report, 10);
-#endif
+        (void) hostSendReport(0, &out_report, 10);
         return;
     }
 
     if (report[1] == SWITCH_SUBCMD_HANDSHAKE || report[0] == SWITCH_REPORT_OUTPUT_30) {
         out_report.counter = SWITCH_SUBCMD_DISABLE_USB_TIMEOUT;
-#if CFG_TUH_ENABLED
         (void) nextSwitchReportCounter();
-        tuh_hid_send_report(_dev_addr, _instance, 0, &out_report, 10);
-#endif
+        (void) hostSendReport(0, &out_report, 10);
         _switch_pro_ready = true;
     }
+}
+
+bool USBHostGamepadInput::hostSendReport(uint8_t report_id, const void *report, uint16_t len) {
+#if CFG_TUH_ENABLED
+    return tuh_hid_send_report(_dev_addr, _instance, report_id, report, len);
+#else
+    (void) report_id;
+    (void) report;
+    (void) len;
+    return false;
+#endif
 }
 
 void USBHostGamepadInput::applySwitchProReport(const uint8_t *report, uint16_t len) {

@@ -1,8 +1,7 @@
 #include "usb/USBHostAuthListener.hpp"
 
-#include "host/usbh.h"
 #include "class/hid/hid.h"
-#include "class/hid/hid_host.h"
+#include "host/usbh.h"
 
 #include <cstring>
 
@@ -27,6 +26,10 @@ constexpr uint8_t P5_REPORT_GET_SIGNING_STATE = 0xF2;
 
 bool USBHostAuthListener::available() const {
     return _device_type != USBHostAuthDeviceType::NONE;
+}
+
+void USBHostAuthListener::setup() {
+    clear();
 }
 
 USBHostAuthDeviceType USBHostAuthListener::deviceType() const {
@@ -118,10 +121,10 @@ void USBHostAuthListener::xinputMount(uint8_t dev_addr, uint8_t instance, uint8_
     }
 
     if (type == 1) {
-    _device_type = USBHostAuthDeviceType::XINPUT_360;
-    _dev_addr = dev_addr;
-    _instance = instance;
-}
+        _device_type = USBHostAuthDeviceType::XINPUT_360;
+        _dev_addr = dev_addr;
+        _instance = instance;
+    }
 }
 
 void USBHostAuthListener::xinputUnmount(uint8_t dev_addr, uint8_t instance) {
@@ -148,23 +151,21 @@ void USBHostAuthListener::hidSetReportComplete(
     _last_len = len;
 }
 
-void USBHostAuthListener::hidGetReportCompleteCallback(tuh_xfer_t *xfer) {
-    auto *listener = reinterpret_cast<USBHostAuthListener *>(xfer->user_data);
-    if (listener != nullptr) {
-        listener->onHidGetReportComplete(xfer);
-    }
-}
-
-void USBHostAuthListener::onHidGetReportComplete(tuh_xfer_t *xfer) {
-    _busy = false;
-
-    if (xfer->result != XFER_RESULT_SUCCESS || xfer->setup == nullptr) {
-        _last_len = 0;
+void USBHostAuthListener::hidGetReportComplete(
+    uint8_t dev_addr,
+    uint8_t instance,
+    uint8_t report_id,
+    uint8_t report_type,
+    uint16_t len
+) {
+    if (dev_addr != _dev_addr || instance != _instance) {
         return;
     }
 
-    _last_report_id = tu_u16_low(xfer->setup->wValue);
-    _last_len = static_cast<uint16_t>(xfer->actual_len);
+    (void) report_type;
+    _busy = false;
+    _last_report_id = report_id;
+    _last_len = len;
 }
 
 bool USBHostAuthListener::hidGetReport(uint8_t report_id, void *report, uint16_t len) {
@@ -180,27 +181,22 @@ bool USBHostAuthListener::hidGetReport(uint8_t report_id, void *report, uint16_t
         memcpy(_last_buffer, report, len);
     }
 
-    _last_request = {
-        .bmRequestType_bit =
-            {
-                .recipient = TUSB_REQ_RCPT_INTERFACE,
-                .type = TUSB_REQ_TYPE_CLASS,
-                .direction = TUSB_DIR_IN,
-            },
-        .bRequest = HID_REQ_CONTROL_GET_REPORT,
-        .wValue = tu_u16(HID_REPORT_TYPE_FEATURE, report_id),
-        .wIndex = _interface_number,
-        .wLength = len,
-    };
+    _last_request = {};
+    _last_request.bmRequestType_bit.recipient = TUSB_REQ_RCPT_INTERFACE;
+    _last_request.bmRequestType_bit.type = TUSB_REQ_TYPE_CLASS;
+    _last_request.bmRequestType_bit.direction = TUSB_DIR_IN;
+    _last_request.bRequest = HID_REQ_CONTROL_GET_REPORT;
+    _last_request.wValue = tu_u16(HID_REPORT_TYPE_FEATURE, report_id);
+    _last_request.wIndex = _interface_number;
+    _last_request.wLength = len;
 
-    tuh_xfer_t xfer = {
-        .daddr = _dev_addr,
-        .ep_addr = 0,
-        .setup = &_last_request,
-        .buffer = _last_buffer,
-        .complete_cb = hidGetReportCompleteCallback,
-        .user_data = reinterpret_cast<uintptr_t>(this),
-    };
+    tuh_xfer_t xfer = {};
+    xfer.daddr = _dev_addr;
+    xfer.ep_addr = 0;
+    xfer.setup = &_last_request;
+    xfer.buffer = _last_buffer;
+    xfer.complete_cb = nullptr;
+    xfer.user_data = 0;
 
     bool ok = tuh_control_xfer(&xfer);
     if (!ok) {
@@ -306,6 +302,8 @@ bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len
 
 #else
 
+void USBHostAuthListener::setup() {}
+
 bool USBHostAuthListener::available() const {
     return false;
 }
@@ -380,8 +378,18 @@ void USBHostAuthListener::hidSetReportComplete(
     (void) len;
 }
 
-void USBHostAuthListener::hidGetReportCompleteCallback(tuh_xfer_t *xfer) {
-    (void) xfer;
+void USBHostAuthListener::hidGetReportComplete(
+    uint8_t dev_addr,
+    uint8_t instance,
+    uint8_t report_id,
+    uint8_t report_type,
+    uint16_t len
+) {
+    (void) dev_addr;
+    (void) instance;
+    (void) report_id;
+    (void) report_type;
+    (void) len;
 }
 
 bool USBHostAuthListener::requestPS4Definition() {
@@ -436,10 +444,6 @@ bool USBHostAuthListener::hidSetReport(uint8_t report_id, void *report, uint16_t
     (void) report;
     (void) len;
     return false;
-}
-
-void USBHostAuthListener::onHidGetReportComplete(tuh_xfer_t *xfer) {
-    (void) xfer;
 }
 
 void USBHostAuthListener::clear() {}

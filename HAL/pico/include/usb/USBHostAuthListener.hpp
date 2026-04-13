@@ -2,7 +2,7 @@
 #define _USB_USB_HOST_AUTH_LISTENER_HPP
 
 #include "usb/TinyUSBHostListener.hpp"
-#include "host/usbh.h"
+#include "tusb.h"
 
 enum class USBHostAuthDeviceType {
     NONE = 0,
@@ -13,6 +13,7 @@ enum class USBHostAuthDeviceType {
 
 class USBHostAuthListener : public TinyUSBHostListener {
   public:
+    void setup() override;
     bool available() const;
     USBHostAuthDeviceType deviceType() const;
     bool busy() const;
@@ -33,6 +34,13 @@ class USBHostAuthListener : public TinyUSBHostListener {
         uint8_t report_type,
         uint16_t len
     ) override;
+    void hidGetReportComplete(
+        uint8_t dev_addr,
+        uint8_t instance,
+        uint8_t report_id,
+        uint8_t report_type,
+        uint16_t len
+    ) override;
 
     bool requestPS4Definition();
     bool requestPS4ResetAuth();
@@ -45,10 +53,8 @@ class USBHostAuthListener : public TinyUSBHostListener {
     bool sendP5AuthPayload(const uint8_t *payload, uint16_t len);
 
   private:
-    static void hidGetReportCompleteCallback(tuh_xfer_t *xfer);
     bool hidGetReport(uint8_t report_id, void *report, uint16_t len);
     bool hidSetReport(uint8_t report_id, void *report, uint16_t len);
-    void onHidGetReportComplete(tuh_xfer_t *xfer);
     void clear();
 
     USBHostAuthDeviceType _device_type = USBHostAuthDeviceType::NONE;
@@ -58,8 +64,8 @@ class USBHostAuthListener : public TinyUSBHostListener {
     bool _busy = false;
     uint8_t _last_report_id = 0;
     uint16_t _last_len = 0;
-    uint8_t _last_buffer[64] = {};
     tusb_control_request_t _last_request = {};
+    uint8_t _last_buffer[64] = {};
 };
 
 #endif

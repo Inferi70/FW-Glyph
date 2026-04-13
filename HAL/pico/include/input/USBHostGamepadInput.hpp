@@ -6,6 +6,7 @@
 
 class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
   public:
+    void setup() override;
     InputScanSpeed ScanSpeed() override;
     void UpdateInputs(InputState &inputs) override;
 
@@ -45,6 +46,7 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     void applySwitchProReport(const uint8_t *report, uint16_t len);
     void startSwitchProInit();
     void handleSwitchProInitReport(const uint8_t *report, uint16_t len);
+    bool hostSendReport(uint8_t report_id, const void *report, uint16_t len);
     uint8_t nextSwitchReportCounter();
     void setDpadFromHat(uint8_t hat);
 

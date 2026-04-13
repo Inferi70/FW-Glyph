@@ -93,6 +93,7 @@ bool TinyUSBHostManager::pushListener(TinyUSBHostListener *listener) {
         return false;
     }
 
+    listener->setup();
     _listeners[_listener_count++] = listener;
     return true;
 }
@@ -146,6 +147,18 @@ void TinyUSBHostManager::hidSetReportComplete(
 ) {
     for (size_t i = 0; i < _listener_count; i++) {
         _listeners[i]->hidSetReportComplete(dev_addr, instance, report_id, report_type, len);
+    }
+}
+
+void TinyUSBHostManager::hidGetReportComplete(
+    uint8_t dev_addr,
+    uint8_t instance,
+    uint8_t report_id,
+    uint8_t report_type,
+    uint16_t len
+) {
+    for (size_t i = 0; i < _listener_count; i++) {
+        _listeners[i]->hidGetReportComplete(dev_addr, instance, report_id, report_type, len);
     }
 }
 
@@ -230,6 +243,24 @@ void tuh_hid_set_report_complete_cb(
 ) {
     if (len != 0) {
         TinyUSBHostManager::instance().hidSetReportComplete(
+            dev_addr,
+            instance,
+            report_id,
+            report_type,
+            len
+        );
+    }
+}
+
+void tuh_hid_get_report_complete_cb(
+    uint8_t dev_addr,
+    uint8_t instance,
+    uint8_t report_id,
+    uint8_t report_type,
+    uint16_t len
+) {
+    if (len != 0) {
+        TinyUSBHostManager::instance().hidGetReportComplete(
             dev_addr,
             instance,
             report_id,

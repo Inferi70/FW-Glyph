@@ -7,6 +7,8 @@ class TinyUSBHostListener {
   public:
     virtual ~TinyUSBHostListener() {}
 
+    virtual void setup() {}
+
     virtual void mount(uint8_t dev_addr, uint16_t vid, uint16_t pid) {}
     virtual void unmount(uint8_t dev_addr) {}
 
@@ -27,6 +29,14 @@ class TinyUSBHostListener {
     ) {}
 
     virtual void hidSetReportComplete(
+        uint8_t dev_addr,
+        uint8_t instance,
+        uint8_t report_id,
+        uint8_t report_type,
+        uint16_t len
+    ) {}
+
+    virtual void hidGetReportComplete(
         uint8_t dev_addr,
         uint8_t instance,
         uint8_t report_id,
