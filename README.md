@@ -30,7 +30,7 @@ The `tiny-usb-rewrite` branch removes the project's dependence on Adafruit's Tin
 - Adafruit RP2040 TinyUSB port glue:
   replaced with repo-owned `TinyUSBPortRP2040.cpp` and a repo-owned `Adafruit_TinyUSB.h` umbrella header.
 - Adafruit TinyUSB core C build path:
-  replaced with direct TinyUSB core sources from the framework's `pico-sdk/lib/tinyusb/src` tree.
+  replaced with a repo-vendored TinyUSB source tree aligned with GP2040-CE.
 
 ### What Was Wrapped First
 
@@ -47,15 +47,16 @@ That let the HID transport be swapped underneath without changing every caller a
 For `pio run -e glyph_mk6`:
 
 - HID, XInput, CDC/API glue, RP2040 port glue, and device runtime are repo-owned.
-- TinyUSB core C sources are built directly from:
-  `framework-arduinopico/pico-sdk/lib/tinyusb/src`
+- TinyUSB core C sources are built from:
+  `third_party/tinyusb_gp2040/src`
 - The old Adafruit TinyUSB wrapper and port sources are skipped in the build script.
 
 For `pio run -e glyph_mk6_usb_host`:
 
 - Repo-owned host manager, host listeners, XInput host class glue, and RP2040 host port glue are used.
 - Vendored `pico_pio_usb` provides the RP2040 host transport.
-- TinyUSB host-side C sources are built from the framework's vendored `Adafruit_TinyUSB_Arduino/src` tree so HID/XInput host support stays on one internally consistent host API surface.
+- TinyUSB host-side C sources are built from the same vendored GP2040-aligned tree:
+  `third_party/tinyusb_gp2040/src`
 
 ### USB Host Direction
 
@@ -101,7 +102,7 @@ Current status:
 
 PlatformIO may still print `Adafruit TinyUSB Library` in the dependency graph.
 
-That is a discovery/LDF artifact from the framework package layout, not an indication that Adafruit wrapper or core code is still being compiled. The actual TinyUSB objects now come from `.pio/build/glyph_mk6/TinyUSBCore/...`.
+That is a discovery/LDF artifact from the framework package layout, not an indication that Adafruit wrapper or core code is still being compiled. The actual TinyUSB objects now come from `.pio/build/.../TinyUSBCore/...` and are built from the repo-vendored TinyUSB tree.
 
 ### Build Size Impact
 
