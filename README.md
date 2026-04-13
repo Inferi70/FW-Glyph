@@ -51,6 +51,23 @@ For `pio run -e glyph_mk6`:
   `framework-arduinopico/pico-sdk/lib/tinyusb/src`
 - The old Adafruit TinyUSB wrapper and port sources are skipped in the build script.
 
+### USB Host Direction
+
+The branch also now has the first GP2040-CE-style host scaffolding:
+
+- `InputSourceManager` exists as the seam between raw inputs and communication backends.
+- `TinyUSBHostManager` owns TinyUSB host startup, task pumping, and listener fan-out.
+- `glyph_mk6_usb_host` is a dedicated host-enabled build using vendored `pico_pio_usb`.
+- Host-enabled TinyUSB now builds HID host and XInput host support.
+- The XInput host class driver is repo-owned and closely ported from GP2040-CE's `xinput_host`.
+
+Current status:
+
+- Host builds pass.
+- Device builds still pass.
+- Hosted controller input is not yet mapped into FW-Glyph gameplay state.
+- The next step is a host-backed input listener/source that consumes HID and XInput host reports and feeds `InputSourceManager`.
+
 ### XInput Notes
 
 - The final XInput fix was not a descriptor tweak. The real issue was callback timing.

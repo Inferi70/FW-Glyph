@@ -8,6 +8,31 @@ bool TinyUSB_Port_InitHost(uint8_t rhport);
 void TinyUSB_Port_DeinitHost(uint8_t rhport);
 }
 
+#if CFG_TUH_ENABLED && CFG_TUH_XINPUT
+#include "host/usbh_pvt.h"
+#include "usb/TinyUSBXInputHost.h"
+
+static void xinputh_driver_init() {
+    (void) xinputh_init();
+}
+
+static usbh_class_driver_t driver_host[] = {{
+#if CFG_TUSB_DEBUG >= 2
+    .name = "XInput_Host_HID",
+#endif
+    .init = xinputh_driver_init,
+    .open = xinputh_open,
+    .set_config = xinputh_set_config,
+    .xfer_cb = xinputh_xfer_cb,
+    .close = xinputh_close,
+}};
+
+extern "C" usbh_class_driver_t const *usbh_app_driver_get_cb(uint8_t *driver_count) {
+    *driver_count = 1;
+    return driver_host;
+}
+#endif
+
 TinyUSBHostManager &TinyUSBHostManager::instance() {
     static TinyUSBHostManager manager;
     return manager;
@@ -112,6 +137,40 @@ void TinyUSBHostManager::hidReportReceived(
     }
 }
 
+void TinyUSBHostManager::xinputMount(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
+    for (size_t i = 0; i < _listener_count; i++) {
+        _listeners[i]->xinputMount(dev_addr, instance, type, subtype);
+    }
+}
+
+void TinyUSBHostManager::xinputUnmount(uint8_t dev_addr, uint8_t instance) {
+    for (size_t i = 0; i < _listener_count; i++) {
+        _listeners[i]->xinputUnmount(dev_addr, instance);
+    }
+}
+
+void TinyUSBHostManager::xinputReportReceived(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *report,
+    uint16_t len
+) {
+    for (size_t i = 0; i < _listener_count; i++) {
+        _listeners[i]->xinputReportReceived(dev_addr, instance, report, len);
+    }
+}
+
+void TinyUSBHostManager::xinputReportSent(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *report,
+    uint16_t len
+) {
+    for (size_t i = 0; i < _listener_count; i++) {
+        _listeners[i]->xinputReportSent(dev_addr, instance, report, len);
+    }
+}
+
 #if CFG_TUH_ENABLED
 extern "C" {
 
@@ -148,6 +207,32 @@ void tuh_hid_report_received_cb(
 ) {
     TinyUSBHostManager::instance().hidReportReceived(dev_addr, instance, report, len);
     tuh_hid_receive_report(dev_addr, instance);
+}
+
+void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
+    TinyUSBHostManager::instance().xinputMount(dev_addr, instance, type, subtype);
+}
+
+void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
+    TinyUSBHostManager::instance().xinputUnmount(dev_addr, instance);
+}
+
+void tuh_xinput_report_received_cb(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *report,
+    uint16_t len
+) {
+    TinyUSBHostManager::instance().xinputReportReceived(dev_addr, instance, report, len);
+}
+
+void tuh_xinput_report_sent_cb(
+    uint8_t dev_addr,
+    uint8_t instance,
+    const uint8_t *report,
+    uint16_t len
+) {
+    TinyUSBHostManager::instance().xinputReportSent(dev_addr, instance, report, len);
 }
 
 }

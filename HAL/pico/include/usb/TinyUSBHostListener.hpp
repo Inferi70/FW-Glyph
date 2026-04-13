@@ -25,6 +25,29 @@ class TinyUSBHostListener {
         const uint8_t *report,
         uint16_t len
     ) {}
+
+    virtual void xinputMount(
+        uint8_t dev_addr,
+        uint8_t instance,
+        uint8_t type,
+        uint8_t subtype
+    ) {}
+
+    virtual void xinputUnmount(uint8_t dev_addr, uint8_t instance) {}
+
+    virtual void xinputReportReceived(
+        uint8_t dev_addr,
+        uint8_t instance,
+        const uint8_t *report,
+        uint16_t len
+    ) {}
+
+    virtual void xinputReportSent(
+        uint8_t dev_addr,
+        uint8_t instance,
+        const uint8_t *report,
+        uint16_t len
+    ) {}
 };
 
 #endif
