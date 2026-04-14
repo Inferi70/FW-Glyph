@@ -636,7 +636,7 @@ void USBHostGamepadInput::applyNormalizedState(InputState &inputs) {
     set_button(inputs.buttons, BTN_LF3, buttonPressed(HOST_BTN_DPAD_LEFT));
     set_button(inputs.buttons, BTN_LF1, buttonPressed(HOST_BTN_DPAD_RIGHT));
     set_button(inputs.buttons, BTN_LF2, buttonPressed(HOST_BTN_DPAD_DOWN));
-    set_button(inputs.buttons, BTN_LT1, buttonPressed(HOST_BTN_DPAD_UP));
+    set_button(inputs.buttons, BTN_RF4, buttonPressed(HOST_BTN_DPAD_UP));
 
     set_button(inputs.buttons, BTN_RF1, buttonPressed(HOST_BTN_A));
     set_button(inputs.buttons, BTN_RF2, buttonPressed(HOST_BTN_B));
@@ -651,8 +651,9 @@ void USBHostGamepadInput::applyNormalizedState(InputState &inputs) {
     set_button(inputs.buttons, BTN_MB6, buttonPressed(HOST_BTN_BACK));
     set_button(inputs.buttons, BTN_MB5, buttonPressed(HOST_BTN_HOME));
     set_button(inputs.buttons, BTN_MB4, false);
-    set_button(inputs.buttons, BTN_LT2, buttonPressed(HOST_BTN_LS));
-    set_button(inputs.buttons, BTN_RT1, buttonPressed(HOST_BTN_RS));
+    set_button(inputs.buttons, BTN_LT1, buttonPressed(HOST_BTN_LS));
+    set_button(inputs.buttons, BTN_LT2, buttonPressed(HOST_BTN_RS));
+    set_button(inputs.buttons, BTN_RT1, false);
 
     set_button(inputs.buttons, BTN_RT3, _state.rx < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
     set_button(inputs.buttons, BTN_RT5, _state.rx > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
