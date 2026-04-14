@@ -82,11 +82,13 @@ Current status:
 - Repo-owned host auth detection and transport now exist through `USBHostAuthListener`.
 - The current auth listener can detect PS4-style HID auth devices, P5 auth devices, and XInput 360-class host devices.
 - PS4/P5 feature-report auth requests are now routed through TinyUSB host HID get/set report helpers in the host-enabled build.
-- `USBHostAuthPassthrough` now provides a repo-owned bridge for future console-facing auth drivers:
+- `USBHostAuthPassthrough` now provides a repo-owned bridge for console-facing auth drivers:
   it queues PS4/P5 feature-report requests, drives the host dongle, and buffers responses back.
 - `PlayStationAuthPassthrough` now provides a repo-owned PS4/P5 auth session layer on top of that bridge:
   it owns the console-side PS4/P5 auth report flow and sequences the host dongle requests.
-- Full console auth is still not end-to-end in FW-Glyph yet because PS4/PS5 output drivers are not present to consume that session layer.
+- `COMMS_BACKEND_PASSTHROUGH_PS4` and `COMMS_BACKEND_PASSTHROUGH_PS5` now exist as PS4-family HID device backends.
+- Those backends use repo-owned HID get/set report callbacks and consume `PlayStationAuthPassthrough`.
+- End-to-end passthrough is now wired in firmware, but it still needs real hardware validation on PS4/PS5 hosts.
 
 ### XInput Notes
 

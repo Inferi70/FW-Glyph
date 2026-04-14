@@ -7,6 +7,7 @@
 #include "comms/N64Backend.hpp"
 #include "comms/NesBackend.hpp"
 #include "comms/NintendoSwitchBackend.hpp"
+#include "comms/PlayStationBackend.hpp"
 #include "comms/SnesBackend.hpp"
 #include "comms/XInputBackend.hpp"
 #include "core/CommunicationBackend.hpp"
@@ -68,6 +69,8 @@ size_t initialize_backends(
         if (detected_backend_id == COMMS_BACKEND_XINPUT || 
             detected_backend_id == COMMS_BACKEND_DINPUT ||
             detected_backend_id == COMMS_BACKEND_NINTENDO_SWITCH ||
+            detected_backend_id == COMMS_BACKEND_PASSTHROUGH_PS4 ||
+            detected_backend_id == COMMS_BACKEND_PASSTHROUGH_PS5 ||
             detected_backend_id == COMMS_BACKEND_CONFIGURATOR) {
             backend_config = usb_backend_config;
         } else {
@@ -176,6 +179,26 @@ void init_primary_backend(
                 primary_backend = new XInputBackend(inputs, input_sources, input_source_count);
             }
             break;
+        case COMMS_BACKEND_PASSTHROUGH_PS4:
+            if (primary_backend == nullptr) {
+                primary_backend = new PlayStationBackend(
+                    PlayStationBackendMode::PS4,
+                    inputs,
+                    input_sources,
+                    input_source_count
+                );
+            }
+            break;
+        case COMMS_BACKEND_PASSTHROUGH_PS5:
+            if (primary_backend == nullptr) {
+                primary_backend = new PlayStationBackend(
+                    PlayStationBackendMode::PS5,
+                    inputs,
+                    input_sources,
+                    input_source_count
+                );
+            }
+            break;
         case COMMS_BACKEND_GAMECUBE:
             delete primary_backend;
             primary_backend =
@@ -233,6 +256,8 @@ size_t init_secondary_backends(
     switch (backend_id) {
         case COMMS_BACKEND_DINPUT:
         case COMMS_BACKEND_XINPUT:
+        case COMMS_BACKEND_PASSTHROUGH_PS4:
+        case COMMS_BACKEND_PASSTHROUGH_PS5:
             backend_count = 2;
             backends = new CommunicationBackend *[backend_count] {
                 primary_backend, new B0XXInputViewer(inputs, input_sources, input_source_count)
@@ -270,6 +295,8 @@ backend_config_selector_t get_backend_config_default = [](
             if(backend_config.backend_id == COMMS_BACKEND_DINPUT ||
                 backend_config.backend_id == COMMS_BACKEND_XINPUT ||
                 backend_config.backend_id == COMMS_BACKEND_NINTENDO_SWITCH ||
+                backend_config.backend_id == COMMS_BACKEND_PASSTHROUGH_PS4 ||
+                backend_config.backend_id == COMMS_BACKEND_PASSTHROUGH_PS5 ||
                 backend_config.backend_id == COMMS_BACKEND_CONFIGURATOR) {
                 config.default_usb_backend_config = temp_backend_index;
             } else {

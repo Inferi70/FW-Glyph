@@ -66,6 +66,10 @@ constexpr const char *backend_name(CommunicationBackendId backend_id) {
             return "SNES";
         case COMMS_BACKEND_NINTENDO_SWITCH:
             return "Switch";
+        case COMMS_BACKEND_PASSTHROUGH_PS4:
+            return "PS4";
+        case COMMS_BACKEND_PASSTHROUGH_PS5:
+            return "PS5";
         case COMMS_BACKEND_CONFIGURATOR:
             return "Configurator";
         default:

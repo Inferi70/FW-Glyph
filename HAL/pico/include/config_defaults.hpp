@@ -88,7 +88,7 @@ const Config default_config = {
             .keyboard_mode_config = 1,
         },
     },
-    .communication_backend_configs_count = 8,
+    .communication_backend_configs_count = 10,
     .communication_backend_configs = {
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_XINPUT,
@@ -105,6 +105,14 @@ const Config default_config = {
             .default_mode_config = 3,
             .activation_binding_count = 1,
             .activation_binding = { BTN_RF2 },
+        },
+        CommunicationBackendConfig {
+            .backend_id = COMMS_BACKEND_PASSTHROUGH_PS4,
+            .default_mode_config = 1,
+        },
+        CommunicationBackendConfig {
+            .backend_id = COMMS_BACKEND_PASSTHROUGH_PS5,
+            .default_mode_config = 1,
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_GAMECUBE,
