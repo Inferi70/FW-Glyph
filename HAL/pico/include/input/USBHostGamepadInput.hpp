@@ -38,8 +38,36 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
         SWITCH_PRO_HID,
     };
 
+    enum HostedButtonMask : uint32_t {
+        HOST_BTN_DPAD_UP = 1u << 0,
+        HOST_BTN_DPAD_DOWN = 1u << 1,
+        HOST_BTN_DPAD_LEFT = 1u << 2,
+        HOST_BTN_DPAD_RIGHT = 1u << 3,
+        HOST_BTN_START = 1u << 4,
+        HOST_BTN_BACK = 1u << 5,
+        HOST_BTN_LS = 1u << 6,
+        HOST_BTN_RS = 1u << 7,
+        HOST_BTN_LB = 1u << 8,
+        HOST_BTN_RB = 1u << 9,
+        HOST_BTN_HOME = 1u << 10,
+        HOST_BTN_A = 1u << 11,
+        HOST_BTN_B = 1u << 12,
+        HOST_BTN_X = 1u << 13,
+        HOST_BTN_Y = 1u << 14,
+    };
+
+    struct HostedGamepadState {
+        uint32_t buttons = 0;
+        uint8_t lt = 0;
+        uint8_t rt = 0;
+        uint8_t lx = 128;
+        uint8_t ly = 128;
+        uint8_t rx = 128;
+        uint8_t ry = 128;
+    };
+
     void clearMappedInputs(InputState &inputs);
-    void applyXInputState(InputState &inputs);
+    void applyNormalizedState(InputState &inputs);
     void resetState();
     void applyDs4Report(const uint8_t *report, uint16_t len);
     void applyDualSenseReport(const uint8_t *report, uint16_t len);
@@ -49,6 +77,9 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     bool hostSendReport(uint8_t report_id, const void *report, uint16_t len);
     uint8_t nextSwitchReportCounter();
     void setDpadFromHat(uint8_t hat);
+    void clearButtons(uint32_t mask);
+    void setButtons(uint32_t mask, bool enabled);
+    bool buttonPressed(HostedButtonMask mask) const;
 
     bool _active = false;
     bool _applied_last_update = false;
@@ -60,28 +91,7 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     uint16_t _last_pid = 0;
     bool _switch_pro_ready = false;
     uint8_t _switch_report_counter = 0;
-
-    bool _dpad_up = false;
-    bool _dpad_down = false;
-    bool _dpad_left = false;
-    bool _dpad_right = false;
-    bool _start = false;
-    bool _back = false;
-    bool _ls = false;
-    bool _rs = false;
-    bool _lb = false;
-    bool _rb = false;
-    bool _home = false;
-    bool _a = false;
-    bool _b = false;
-    bool _x = false;
-    bool _y = false;
-    uint8_t _lt = 0;
-    uint8_t _rt = 0;
-    uint8_t _lx = 128;
-    uint8_t _ly = 128;
-    uint8_t _rx = 128;
-    uint8_t _ry = 128;
+    HostedGamepadState _state = {};
 };
 
 #endif

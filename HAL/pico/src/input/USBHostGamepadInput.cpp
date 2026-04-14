@@ -213,7 +213,7 @@ void USBHostGamepadInput::setup() {
 void USBHostGamepadInput::UpdateInputs(InputState &inputs) {
     if (_active) {
         clearMappedInputs(inputs);
-        applyXInputState(inputs);
+        applyNormalizedState(inputs);
         _applied_last_update = true;
         return;
     }
@@ -371,27 +371,27 @@ void USBHostGamepadInput::xinputReportReceived(
     xinput_host_report_t xinput_report = {};
     memcpy(&xinput_report, report, sizeof(xinput_report));
 
-    _dpad_up = xinput_report.buttons1 & XBOX_MASK_UP;
-    _dpad_down = xinput_report.buttons1 & XBOX_MASK_DOWN;
-    _dpad_left = xinput_report.buttons1 & XBOX_MASK_LEFT;
-    _dpad_right = xinput_report.buttons1 & XBOX_MASK_RIGHT;
-    _start = xinput_report.buttons1 & XBOX_MASK_START;
-    _back = xinput_report.buttons1 & XBOX_MASK_BACK;
-    _ls = xinput_report.buttons1 & XBOX_MASK_LS;
-    _rs = xinput_report.buttons1 & XBOX_MASK_RS;
-    _lb = xinput_report.buttons2 & XBOX_MASK_LB;
-    _rb = xinput_report.buttons2 & XBOX_MASK_RB;
-    _home = xinput_report.buttons2 & XBOX_MASK_HOME;
-    _a = xinput_report.buttons2 & XBOX_MASK_A;
-    _b = xinput_report.buttons2 & XBOX_MASK_B;
-    _x = xinput_report.buttons2 & XBOX_MASK_X;
-    _y = xinput_report.buttons2 & XBOX_MASK_Y;
-    _lt = xinput_report.lt;
-    _rt = xinput_report.rt;
-    _lx = axis_to_uint8(xinput_report.lx);
-    _ly = axis_to_uint8(xinput_report.ly, true);
-    _rx = axis_to_uint8(xinput_report.rx);
-    _ry = axis_to_uint8(xinput_report.ry, true);
+    setButtons(HOST_BTN_DPAD_UP, xinput_report.buttons1 & XBOX_MASK_UP);
+    setButtons(HOST_BTN_DPAD_DOWN, xinput_report.buttons1 & XBOX_MASK_DOWN);
+    setButtons(HOST_BTN_DPAD_LEFT, xinput_report.buttons1 & XBOX_MASK_LEFT);
+    setButtons(HOST_BTN_DPAD_RIGHT, xinput_report.buttons1 & XBOX_MASK_RIGHT);
+    setButtons(HOST_BTN_START, xinput_report.buttons1 & XBOX_MASK_START);
+    setButtons(HOST_BTN_BACK, xinput_report.buttons1 & XBOX_MASK_BACK);
+    setButtons(HOST_BTN_LS, xinput_report.buttons1 & XBOX_MASK_LS);
+    setButtons(HOST_BTN_RS, xinput_report.buttons1 & XBOX_MASK_RS);
+    setButtons(HOST_BTN_LB, xinput_report.buttons2 & XBOX_MASK_LB);
+    setButtons(HOST_BTN_RB, xinput_report.buttons2 & XBOX_MASK_RB);
+    setButtons(HOST_BTN_HOME, xinput_report.buttons2 & XBOX_MASK_HOME);
+    setButtons(HOST_BTN_A, xinput_report.buttons2 & XBOX_MASK_A);
+    setButtons(HOST_BTN_B, xinput_report.buttons2 & XBOX_MASK_B);
+    setButtons(HOST_BTN_X, xinput_report.buttons2 & XBOX_MASK_X);
+    setButtons(HOST_BTN_Y, xinput_report.buttons2 & XBOX_MASK_Y);
+    _state.lt = xinput_report.lt;
+    _state.rt = xinput_report.rt;
+    _state.lx = axis_to_uint8(xinput_report.lx);
+    _state.ly = axis_to_uint8(xinput_report.ly, true);
+    _state.rx = axis_to_uint8(xinput_report.rx);
+    _state.ry = axis_to_uint8(xinput_report.ry, true);
 
     #if CFG_TUH_ENABLED && CFG_TUH_XINPUT
     tuh_xinput_receive_report(dev_addr, instance);
@@ -401,63 +401,36 @@ void USBHostGamepadInput::xinputReportReceived(
 void USBHostGamepadInput::resetState() {
     _switch_pro_ready = false;
     _switch_report_counter = 0;
-    _dpad_up = false;
-    _dpad_down = false;
-    _dpad_left = false;
-    _dpad_right = false;
-    _start = false;
-    _back = false;
-    _ls = false;
-    _rs = false;
-    _lb = false;
-    _rb = false;
-    _home = false;
-    _a = false;
-    _b = false;
-    _x = false;
-    _y = false;
-    _lt = 0;
-    _rt = 0;
-    _lx = 128;
-    _ly = 128;
-    _rx = 128;
-    _ry = 128;
+    _state = {};
 }
 
 void USBHostGamepadInput::setDpadFromHat(uint8_t hat) {
-    _dpad_up = false;
-    _dpad_down = false;
-    _dpad_left = false;
-    _dpad_right = false;
+    clearButtons(HOST_BTN_DPAD_UP | HOST_BTN_DPAD_DOWN | HOST_BTN_DPAD_LEFT | HOST_BTN_DPAD_RIGHT);
 
     switch (hat) {
         case PS4_HAT_UP:
-            _dpad_up = true;
+            setButtons(HOST_BTN_DPAD_UP, true);
             break;
         case PS4_HAT_UPRIGHT:
-            _dpad_up = true;
-            _dpad_right = true;
+            setButtons(HOST_BTN_DPAD_UP | HOST_BTN_DPAD_RIGHT, true);
             break;
         case PS4_HAT_RIGHT:
-            _dpad_right = true;
+            setButtons(HOST_BTN_DPAD_RIGHT, true);
             break;
         case PS4_HAT_DOWNRIGHT:
-            _dpad_down = true;
-            _dpad_right = true;
+            setButtons(HOST_BTN_DPAD_DOWN | HOST_BTN_DPAD_RIGHT, true);
             break;
         case PS4_HAT_DOWN:
-            _dpad_down = true;
+            setButtons(HOST_BTN_DPAD_DOWN, true);
             break;
         case PS4_HAT_DOWNLEFT:
-            _dpad_down = true;
-            _dpad_left = true;
+            setButtons(HOST_BTN_DPAD_DOWN | HOST_BTN_DPAD_LEFT, true);
             break;
         case PS4_HAT_LEFT:
-            _dpad_left = true;
+            setButtons(HOST_BTN_DPAD_LEFT, true);
             break;
         case PS4_HAT_UPLEFT:
-            _dpad_up = true;
-            _dpad_left = true;
+            setButtons(HOST_BTN_DPAD_UP | HOST_BTN_DPAD_LEFT, true);
             break;
         default:
             break;
@@ -477,23 +450,23 @@ void USBHostGamepadInput::applyDs4Report(const uint8_t *report, uint16_t len) {
     }
 
     setDpadFromHat(ds4_report.dpad);
-    _start = ds4_report.button_start;
-    _back = ds4_report.button_select;
-    _ls = ds4_report.button_l3;
-    _rs = ds4_report.button_r3;
-    _lb = ds4_report.button_l1;
-    _rb = ds4_report.button_r1;
-    _home = ds4_report.button_home;
-    _a = ds4_report.button_south;
-    _b = ds4_report.button_east;
-    _x = ds4_report.button_west;
-    _y = ds4_report.button_north;
-    _lt = ds4_report.left_trigger;
-    _rt = ds4_report.right_trigger;
-    _lx = ds4_report.left_stick_x;
-    _ly = static_cast<uint8_t>(~ds4_report.left_stick_y);
-    _rx = ds4_report.right_stick_x;
-    _ry = static_cast<uint8_t>(~ds4_report.right_stick_y);
+    setButtons(HOST_BTN_START, ds4_report.button_start);
+    setButtons(HOST_BTN_BACK, ds4_report.button_select);
+    setButtons(HOST_BTN_LS, ds4_report.button_l3);
+    setButtons(HOST_BTN_RS, ds4_report.button_r3);
+    setButtons(HOST_BTN_LB, ds4_report.button_l1);
+    setButtons(HOST_BTN_RB, ds4_report.button_r1);
+    setButtons(HOST_BTN_HOME, ds4_report.button_home);
+    setButtons(HOST_BTN_A, ds4_report.button_south);
+    setButtons(HOST_BTN_B, ds4_report.button_east);
+    setButtons(HOST_BTN_X, ds4_report.button_west);
+    setButtons(HOST_BTN_Y, ds4_report.button_north);
+    _state.lt = ds4_report.left_trigger;
+    _state.rt = ds4_report.right_trigger;
+    _state.lx = ds4_report.left_stick_x;
+    _state.ly = static_cast<uint8_t>(~ds4_report.left_stick_y);
+    _state.rx = ds4_report.right_stick_x;
+    _state.ry = static_cast<uint8_t>(~ds4_report.right_stick_y);
 }
 
 void USBHostGamepadInput::applyDualSenseReport(const uint8_t *report, uint16_t len) {
@@ -509,23 +482,23 @@ void USBHostGamepadInput::applyDualSenseReport(const uint8_t *report, uint16_t l
     }
 
     setDpadFromHat(dualsense_report.dpad);
-    _start = dualsense_report.button_start;
-    _back = dualsense_report.button_select;
-    _ls = dualsense_report.button_l3;
-    _rs = dualsense_report.button_r3;
-    _lb = dualsense_report.button_l1;
-    _rb = dualsense_report.button_r1;
-    _home = dualsense_report.button_home;
-    _a = dualsense_report.button_south;
-    _b = dualsense_report.button_east;
-    _x = dualsense_report.button_west;
-    _y = dualsense_report.button_north;
-    _lt = dualsense_report.left_trigger;
-    _rt = dualsense_report.right_trigger;
-    _lx = dualsense_report.left_stick_x;
-    _ly = static_cast<uint8_t>(~dualsense_report.left_stick_y);
-    _rx = dualsense_report.right_stick_x;
-    _ry = static_cast<uint8_t>(~dualsense_report.right_stick_y);
+    setButtons(HOST_BTN_START, dualsense_report.button_start);
+    setButtons(HOST_BTN_BACK, dualsense_report.button_select);
+    setButtons(HOST_BTN_LS, dualsense_report.button_l3);
+    setButtons(HOST_BTN_RS, dualsense_report.button_r3);
+    setButtons(HOST_BTN_LB, dualsense_report.button_l1);
+    setButtons(HOST_BTN_RB, dualsense_report.button_r1);
+    setButtons(HOST_BTN_HOME, dualsense_report.button_home);
+    setButtons(HOST_BTN_A, dualsense_report.button_south);
+    setButtons(HOST_BTN_B, dualsense_report.button_east);
+    setButtons(HOST_BTN_X, dualsense_report.button_west);
+    setButtons(HOST_BTN_Y, dualsense_report.button_north);
+    _state.lt = dualsense_report.left_trigger;
+    _state.rt = dualsense_report.right_trigger;
+    _state.lx = dualsense_report.left_stick_x;
+    _state.ly = static_cast<uint8_t>(~dualsense_report.left_stick_y);
+    _state.rx = dualsense_report.right_stick_x;
+    _state.ry = static_cast<uint8_t>(~dualsense_report.right_stick_y);
 }
 
 void USBHostGamepadInput::startSwitchProInit() {
@@ -591,27 +564,27 @@ void USBHostGamepadInput::applySwitchProReport(const uint8_t *report, uint16_t l
     switch_pro_report_t switch_report = {};
     memcpy(&switch_report, report, sizeof(switch_report));
 
-    _dpad_up = switch_report.inputs.dpad_up;
-    _dpad_down = switch_report.inputs.dpad_down;
-    _dpad_left = switch_report.inputs.dpad_left;
-    _dpad_right = switch_report.inputs.dpad_right;
-    _start = switch_report.inputs.button_plus;
-    _back = switch_report.inputs.button_minus;
-    _ls = switch_report.inputs.button_thumb_l;
-    _rs = switch_report.inputs.button_thumb_r;
-    _lb = switch_report.inputs.button_l;
-    _rb = switch_report.inputs.button_r;
-    _home = switch_report.inputs.button_home;
-    _a = switch_report.inputs.button_b;
-    _b = switch_report.inputs.button_a;
-    _x = switch_report.inputs.button_y;
-    _y = switch_report.inputs.button_x;
-    _lt = switch_report.inputs.button_zl ? 0xFF : 0x00;
-    _rt = switch_report.inputs.button_zr ? 0xFF : 0x00;
-    _lx = static_cast<uint8_t>(switch_report.inputs.left_stick.getX() >> 4);
-    _ly = static_cast<uint8_t>(~(switch_report.inputs.left_stick.getY() >> 4));
-    _rx = static_cast<uint8_t>(switch_report.inputs.right_stick.getX() >> 4);
-    _ry = static_cast<uint8_t>(~(switch_report.inputs.right_stick.getY() >> 4));
+    setButtons(HOST_BTN_DPAD_UP, switch_report.inputs.dpad_up);
+    setButtons(HOST_BTN_DPAD_DOWN, switch_report.inputs.dpad_down);
+    setButtons(HOST_BTN_DPAD_LEFT, switch_report.inputs.dpad_left);
+    setButtons(HOST_BTN_DPAD_RIGHT, switch_report.inputs.dpad_right);
+    setButtons(HOST_BTN_START, switch_report.inputs.button_plus);
+    setButtons(HOST_BTN_BACK, switch_report.inputs.button_minus);
+    setButtons(HOST_BTN_LS, switch_report.inputs.button_thumb_l);
+    setButtons(HOST_BTN_RS, switch_report.inputs.button_thumb_r);
+    setButtons(HOST_BTN_LB, switch_report.inputs.button_l);
+    setButtons(HOST_BTN_RB, switch_report.inputs.button_r);
+    setButtons(HOST_BTN_HOME, switch_report.inputs.button_home);
+    setButtons(HOST_BTN_A, switch_report.inputs.button_b);
+    setButtons(HOST_BTN_B, switch_report.inputs.button_a);
+    setButtons(HOST_BTN_X, switch_report.inputs.button_y);
+    setButtons(HOST_BTN_Y, switch_report.inputs.button_x);
+    _state.lt = switch_report.inputs.button_zl ? 0xFF : 0x00;
+    _state.rt = switch_report.inputs.button_zr ? 0xFF : 0x00;
+    _state.lx = static_cast<uint8_t>(switch_report.inputs.left_stick.getX() >> 4);
+    _state.ly = static_cast<uint8_t>(~(switch_report.inputs.left_stick.getY() >> 4));
+    _state.rx = static_cast<uint8_t>(switch_report.inputs.right_stick.getX() >> 4);
+    _state.ry = static_cast<uint8_t>(~(switch_report.inputs.right_stick.getY() >> 4));
 }
 
 void USBHostGamepadInput::clearMappedInputs(InputState &inputs) {
@@ -643,34 +616,50 @@ void USBHostGamepadInput::clearMappedInputs(InputState &inputs) {
     inputs.nunchuk_z = false;
 }
 
-void USBHostGamepadInput::applyXInputState(InputState &inputs) {
-    set_button(inputs.buttons, BTN_LF3, _dpad_left);
-    set_button(inputs.buttons, BTN_LF1, _dpad_right);
-    set_button(inputs.buttons, BTN_LF2, _dpad_down);
-    set_button(inputs.buttons, BTN_LT1, _dpad_up);
+void USBHostGamepadInput::clearButtons(uint32_t mask) {
+    _state.buttons &= ~mask;
+}
 
-    set_button(inputs.buttons, BTN_RF1, _a);
-    set_button(inputs.buttons, BTN_RF2, _b);
-    set_button(inputs.buttons, BTN_RF5, _x);
-    set_button(inputs.buttons, BTN_RF6, _y);
-    set_button(inputs.buttons, BTN_RF8, _lb);
-    set_button(inputs.buttons, BTN_RF7, _rb);
-    set_button(inputs.buttons, BTN_RF4, _lt > TRIGGER_THRESHOLD);
-    set_button(inputs.buttons, BTN_RF3, _rt > TRIGGER_THRESHOLD);
+void USBHostGamepadInput::setButtons(uint32_t mask, bool enabled) {
+    if (enabled) {
+        _state.buttons |= mask;
+    } else {
+        clearButtons(mask);
+    }
+}
 
-    set_button(inputs.buttons, BTN_MB7, _start);
-    set_button(inputs.buttons, BTN_MB6, _back);
-    set_button(inputs.buttons, BTN_MB5, _home);
+bool USBHostGamepadInput::buttonPressed(HostedButtonMask mask) const {
+    return (_state.buttons & static_cast<uint32_t>(mask)) != 0;
+}
+
+void USBHostGamepadInput::applyNormalizedState(InputState &inputs) {
+    set_button(inputs.buttons, BTN_LF3, buttonPressed(HOST_BTN_DPAD_LEFT));
+    set_button(inputs.buttons, BTN_LF1, buttonPressed(HOST_BTN_DPAD_RIGHT));
+    set_button(inputs.buttons, BTN_LF2, buttonPressed(HOST_BTN_DPAD_DOWN));
+    set_button(inputs.buttons, BTN_LT1, buttonPressed(HOST_BTN_DPAD_UP));
+
+    set_button(inputs.buttons, BTN_RF1, buttonPressed(HOST_BTN_A));
+    set_button(inputs.buttons, BTN_RF2, buttonPressed(HOST_BTN_B));
+    set_button(inputs.buttons, BTN_RF5, buttonPressed(HOST_BTN_X));
+    set_button(inputs.buttons, BTN_RF6, buttonPressed(HOST_BTN_Y));
+    set_button(inputs.buttons, BTN_RF8, buttonPressed(HOST_BTN_LB));
+    set_button(inputs.buttons, BTN_RF7, buttonPressed(HOST_BTN_RB));
+    set_button(inputs.buttons, BTN_RF4, _state.lt > TRIGGER_THRESHOLD);
+    set_button(inputs.buttons, BTN_RF3, _state.rt > TRIGGER_THRESHOLD);
+
+    set_button(inputs.buttons, BTN_MB7, buttonPressed(HOST_BTN_START));
+    set_button(inputs.buttons, BTN_MB6, buttonPressed(HOST_BTN_BACK));
+    set_button(inputs.buttons, BTN_MB5, buttonPressed(HOST_BTN_HOME));
     set_button(inputs.buttons, BTN_MB4, false);
-    set_button(inputs.buttons, BTN_LT2, _ls);
-    set_button(inputs.buttons, BTN_RT1, _rs);
+    set_button(inputs.buttons, BTN_LT2, buttonPressed(HOST_BTN_LS));
+    set_button(inputs.buttons, BTN_RT1, buttonPressed(HOST_BTN_RS));
 
-    set_button(inputs.buttons, BTN_RT3, _rx < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
-    set_button(inputs.buttons, BTN_RT5, _rx > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
-    set_button(inputs.buttons, BTN_RT2, _ry > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
-    set_button(inputs.buttons, BTN_RT4, _ry < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
+    set_button(inputs.buttons, BTN_RT3, _state.rx < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
+    set_button(inputs.buttons, BTN_RT5, _state.rx > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
+    set_button(inputs.buttons, BTN_RT2, _state.ry > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
+    set_button(inputs.buttons, BTN_RT4, _state.ry < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
 
     inputs.nunchuk_connected = true;
-    inputs.nunchuk_x = static_cast<int8_t>(_lx);
-    inputs.nunchuk_y = static_cast<int8_t>(_ly);
+    inputs.nunchuk_x = static_cast<int8_t>(_state.lx);
+    inputs.nunchuk_y = static_cast<int8_t>(_state.ly);
 }
