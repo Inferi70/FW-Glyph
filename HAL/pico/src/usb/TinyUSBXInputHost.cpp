@@ -2,8 +2,8 @@
 
 #if (CFG_TUH_ENABLED && CFG_TUH_XINPUT)
 
-#include "host/usbh.h"
-#include "host/usbh_pvt.h"
+#include "third_party/tinyusb_gp2040/src/host/usbh.h"
+#include "third_party/tinyusb_gp2040/src/host/usbh_pvt.h"
 #include "usb/TinyUSBXInputHost.h"
 
 typedef struct {

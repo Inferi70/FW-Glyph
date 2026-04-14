@@ -9,11 +9,11 @@ void TinyUSB_Port_DeinitHost(uint8_t rhport);
 }
 
 #if CFG_TUH_ENABLED && CFG_TUH_XINPUT
-#include "host/usbh_pvt.h"
+#include "third_party/tinyusb_gp2040/src/host/usbh_pvt.h"
 #include "usb/TinyUSBXInputHost.h"
 
-static void xinputh_driver_init() {
-    (void) xinputh_init();
+static bool xinputh_driver_init() {
+    return xinputh_init();
 }
 
 static usbh_class_driver_t driver_host[] = {{

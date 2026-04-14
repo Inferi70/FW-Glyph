@@ -16,7 +16,7 @@ extern "C" {
 #include "tusb.h"
 
 #if CFG_TUH_ENABLED
-#include "host/usbh.h"
+#include "third_party/tinyusb_gp2040/src/host/usbh.h"
 #include "pio_usb.h"
 #endif
 

@@ -1,7 +1,12 @@
 #include "usb/USBHostAuthListener.hpp"
 
-#include "class/hid/hid.h"
-#include "host/usbh.h"
+#include "third_party/tinyusb_gp2040/src/class/hid/hid.h"
+
+#ifdef tuh_int_handler
+#undef tuh_int_handler
+#endif
+
+#include "third_party/tinyusb_gp2040/src/host/usbh.h"
 
 #include <cstring>
 
