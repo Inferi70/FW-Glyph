@@ -98,102 +98,94 @@ bool TinyUSBHostManager::pushListener(TinyUSBHostListener *listener) {
     return true;
 }
 
-void TinyUSBHostManager::mount(uint8_t dev_addr, uint16_t vid, uint16_t pid) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->mount(dev_addr, vid, pid);
-    }
+void TinyUSBHostManager::mountCallback(uint8_t dev_addr, uint16_t vid, uint16_t pid) {
+    forEachListener(&TinyUSBHostListener::mount, dev_addr, vid, pid);
 }
 
-void TinyUSBHostManager::unmount(uint8_t dev_addr) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->unmount(dev_addr);
-    }
+void TinyUSBHostManager::unmountCallback(uint8_t dev_addr) {
+    forEachListener(&TinyUSBHostListener::unmount, dev_addr);
 }
 
-void TinyUSBHostManager::hidMount(
+void TinyUSBHostManager::hidMountCallback(
     uint8_t dev_addr,
     uint8_t instance,
     const uint8_t *desc_report,
     uint16_t desc_len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->hidMount(dev_addr, instance, desc_report, desc_len);
-    }
+    forEachListener(&TinyUSBHostListener::hidMount, dev_addr, instance, desc_report, desc_len);
 }
 
-void TinyUSBHostManager::hidUnmount(uint8_t dev_addr, uint8_t instance) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->hidUnmount(dev_addr, instance);
-    }
+void TinyUSBHostManager::hidUnmountCallback(uint8_t dev_addr, uint8_t instance) {
+    forEachListener(&TinyUSBHostListener::hidUnmount, dev_addr, instance);
 }
 
-void TinyUSBHostManager::hidReportReceived(
+void TinyUSBHostManager::hidReportReceivedCallback(
     uint8_t dev_addr,
     uint8_t instance,
     const uint8_t *report,
     uint16_t len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->hidReportReceived(dev_addr, instance, report, len);
-    }
+    forEachListener(&TinyUSBHostListener::hidReportReceived, dev_addr, instance, report, len);
 }
 
-void TinyUSBHostManager::hidSetReportComplete(
+void TinyUSBHostManager::hidSetReportCompleteCallback(
     uint8_t dev_addr,
     uint8_t instance,
     uint8_t report_id,
     uint8_t report_type,
     uint16_t len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->hidSetReportComplete(dev_addr, instance, report_id, report_type, len);
-    }
+    forEachListener(
+        &TinyUSBHostListener::hidSetReportComplete,
+        dev_addr,
+        instance,
+        report_id,
+        report_type,
+        len
+    );
 }
 
-void TinyUSBHostManager::hidGetReportComplete(
+void TinyUSBHostManager::hidGetReportCompleteCallback(
     uint8_t dev_addr,
     uint8_t instance,
     uint8_t report_id,
     uint8_t report_type,
     uint16_t len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->hidGetReportComplete(dev_addr, instance, report_id, report_type, len);
-    }
+    forEachListener(
+        &TinyUSBHostListener::hidGetReportComplete,
+        dev_addr,
+        instance,
+        report_id,
+        report_type,
+        len
+    );
 }
 
-void TinyUSBHostManager::xinputMount(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->xinputMount(dev_addr, instance, type, subtype);
-    }
+void TinyUSBHostManager::xinputMountCallback(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
+    forEachListener(&TinyUSBHostListener::xinputMount, dev_addr, instance, type, subtype);
 }
 
-void TinyUSBHostManager::xinputUnmount(uint8_t dev_addr, uint8_t instance) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->xinputUnmount(dev_addr, instance);
-    }
+void TinyUSBHostManager::xinputUnmountCallback(uint8_t dev_addr, uint8_t instance) {
+    forEachListener(&TinyUSBHostListener::xinputUnmount, dev_addr, instance);
 }
 
-void TinyUSBHostManager::xinputReportReceived(
+void TinyUSBHostManager::xinputReportReceivedCallback(
     uint8_t dev_addr,
     uint8_t instance,
     const uint8_t *report,
     uint16_t len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->xinputReportReceived(dev_addr, instance, report, len);
-    }
+    forEachListener(&TinyUSBHostListener::xinputReportReceived, dev_addr, instance, report, len);
 }
 
-void TinyUSBHostManager::xinputReportSent(
+void TinyUSBHostManager::xinputReportSentCallback(
     uint8_t dev_addr,
     uint8_t instance,
     const uint8_t *report,
     uint16_t len
 ) {
-    for (size_t i = 0; i < _listener_count; i++) {
-        _listeners[i]->xinputReportSent(dev_addr, instance, report, len);
-    }
+    forEachListener(&TinyUSBHostListener::xinputReportSent, dev_addr, instance, report, len);
 }
 
 #if CFG_TUH_ENABLED
@@ -203,11 +195,11 @@ void tuh_mount_cb(uint8_t dev_addr) {
     uint16_t vid = 0xFFFF;
     uint16_t pid = 0xFFFF;
     tuh_vid_pid_get(dev_addr, &vid, &pid);
-    TinyUSBHostManager::instance().mount(dev_addr, vid, pid);
+    TinyUSBHostManager::instance().mountCallback(dev_addr, vid, pid);
 }
 
 void tuh_umount_cb(uint8_t dev_addr) {
-    TinyUSBHostManager::instance().unmount(dev_addr);
+    TinyUSBHostManager::instance().unmountCallback(dev_addr);
 }
 
 void tuh_hid_mount_cb(
@@ -216,12 +208,12 @@ void tuh_hid_mount_cb(
     const uint8_t *desc_report,
     uint16_t desc_len
 ) {
-    TinyUSBHostManager::instance().hidMount(dev_addr, instance, desc_report, desc_len);
+    TinyUSBHostManager::instance().hidMountCallback(dev_addr, instance, desc_report, desc_len);
     tuh_hid_receive_report(dev_addr, instance);
 }
 
 void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
-    TinyUSBHostManager::instance().hidUnmount(dev_addr, instance);
+    TinyUSBHostManager::instance().hidUnmountCallback(dev_addr, instance);
 }
 
 void tuh_hid_report_received_cb(
@@ -230,7 +222,7 @@ void tuh_hid_report_received_cb(
     const uint8_t *report,
     uint16_t len
 ) {
-    TinyUSBHostManager::instance().hidReportReceived(dev_addr, instance, report, len);
+    TinyUSBHostManager::instance().hidReportReceivedCallback(dev_addr, instance, report, len);
     tuh_hid_receive_report(dev_addr, instance);
 }
 
@@ -242,7 +234,7 @@ void tuh_hid_set_report_complete_cb(
     uint16_t len
 ) {
     if (len != 0) {
-        TinyUSBHostManager::instance().hidSetReportComplete(
+        TinyUSBHostManager::instance().hidSetReportCompleteCallback(
             dev_addr,
             instance,
             report_id,
@@ -260,7 +252,7 @@ void tuh_hid_get_report_complete_cb(
     uint16_t len
 ) {
     if (len != 0) {
-        TinyUSBHostManager::instance().hidGetReportComplete(
+        TinyUSBHostManager::instance().hidGetReportCompleteCallback(
             dev_addr,
             instance,
             report_id,
@@ -271,11 +263,11 @@ void tuh_hid_get_report_complete_cb(
 }
 
 void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t type, uint8_t subtype) {
-    TinyUSBHostManager::instance().xinputMount(dev_addr, instance, type, subtype);
+    TinyUSBHostManager::instance().xinputMountCallback(dev_addr, instance, type, subtype);
 }
 
 void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
-    TinyUSBHostManager::instance().xinputUnmount(dev_addr, instance);
+    TinyUSBHostManager::instance().xinputUnmountCallback(dev_addr, instance);
 }
 
 void tuh_xinput_report_received_cb(
@@ -284,7 +276,7 @@ void tuh_xinput_report_received_cb(
     const uint8_t *report,
     uint16_t len
 ) {
-    TinyUSBHostManager::instance().xinputReportReceived(dev_addr, instance, report, len);
+    TinyUSBHostManager::instance().xinputReportReceivedCallback(dev_addr, instance, report, len);
 }
 
 void tuh_xinput_report_sent_cb(
@@ -293,7 +285,7 @@ void tuh_xinput_report_sent_cb(
     const uint8_t *report,
     uint16_t len
 ) {
-    TinyUSBHostManager::instance().xinputReportSent(dev_addr, instance, report, len);
+    TinyUSBHostManager::instance().xinputReportSentCallback(dev_addr, instance, report, len);
 }
 
 }

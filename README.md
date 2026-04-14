@@ -13,7 +13,7 @@ Order today through [Satisfye.com](https://www.satisfye.com/collections/glyph), 
 
 ## TinyUSB Rewrite Status
 
-The `tiny-usb-rewrite` branch removes the project's dependence on Adafruit's TinyUSB wrapper layer for the RP2040 build and moves the firmware onto repo-owned glue plus direct TinyUSB core sources.
+The `tiny-usb-rewrite` branch removes the project's dependence on Adafruit's TinyUSB wrapper layer for the RP2040 build and moves the firmware onto repo-owned glue plus vendored TinyUSB sources aligned with GP2040-CE.
 
 ### What Was Replaced
 
@@ -58,40 +58,149 @@ For `pio run -e glyph_mk6_usb_host`:
 - TinyUSB host-side C sources are built from the same vendored GP2040-aligned tree:
   `third_party/tinyusb_gp2040/src`
 
-### USB Host Direction
+## New Features In This Branch
 
-The branch also now has the first GP2040-CE-style host scaffolding:
+### USB Host Build
 
-- `InputSourceManager` exists as the seam between raw inputs and communication backends.
-- `TinyUSBHostManager` owns TinyUSB host startup, task pumping, and listener fan-out.
-- `glyph_mk6_usb_host` is a dedicated host-enabled build using vendored `pico_pio_usb`.
-- Host-enabled TinyUSB now builds HID host and XInput host support.
-- The XInput host class driver is repo-owned and closely ported from GP2040-CE's `xinput_host`.
+Host support is enabled through the dedicated `glyph_mk6_usb_host` environment.
 
-Current status:
+- Default device build:
+  `pio run -e glyph_mk6`
+- Host-enabled build:
+  `pio run -e glyph_mk6_usb_host`
 
-- Host builds pass.
-- Device builds still pass.
-- Repo-owned host input plumbing now includes a first host-backed input source.
-- XInput host reports are translated into FW-Glyph raw input slots through `USBHostGamepadInput`.
-- DS4-class HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
-- DualSense HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
-- Switch Pro HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
-- Generic HID gamepads and joysticks now fall back through TinyUSB's standard gamepad report layout.
-- Hosted controllers now normalize into one shared gamepad state before entering FW-Glyph's existing remap and mode pipeline.
-- Hosted default button targets are still centralized in code rather than exposed as a user-facing host remap UI.
-- Repo-owned host auth detection and transport now exist through `USBHostAuthListener`.
-- The current auth listener can detect PS4-style HID auth devices, P5 auth devices, and XInput 360-class host devices.
-- PS4/P5 feature-report auth requests are now routed through TinyUSB host HID get/set report helpers in the host-enabled build.
-- `USBHostAuthPassthrough` now provides a repo-owned bridge for console-facing auth drivers:
-  it queues PS4/P5 feature-report requests, drives the host dongle, and buffers responses back.
-- `PlayStationAuthPassthrough` now provides a repo-owned PS4/P5 auth session layer on top of that bridge:
-  it owns the console-side PS4/P5 auth report flow and sequences the host dongle requests.
-- `COMMS_BACKEND_PASSTHROUGH_PS4` and `COMMS_BACKEND_PASSTHROUGH_PS5` now exist as PS4-family HID device backends.
-- Those backends use repo-owned HID get/set report callbacks and consume `PlayStationAuthPassthrough`.
-- End-to-end passthrough is now wired in firmware, but it still needs real hardware validation on PS4/PS5 hosts.
-- `XInputBackend` now uses a GP2040-style 4-interface Xbox 360 descriptor and routes console auth requests through `XboxAuthPassthrough`.
-- Xbox auth passthrough is now wired through the existing XInput device path and still needs real Xbox hardware validation.
+The host-enabled build uses:
+
+- vendored TinyUSB from `third_party/tinyusb_gp2040/src`
+- vendored `pico_pio_usb` from `third_party/pico_pio_usb`
+- repo-owned host glue in `HAL/pico/src/usb/`
+
+Relevant config knobs:
+
+- `platformio.ini`
+  - `custom_enable_usb_host = false` in the normal device build
+- `config/glyph/env.ini`
+  - `glyph_mk6_usb_host` sets `custom_enable_usb_host = true`
+
+### Hosted Controller Input
+
+The host build can now ingest controllers connected to the controller's USB host port and feed them into FW-Glyph's normal input pipeline.
+
+Supported hosted controller families:
+
+- XInput
+- DualShock 4
+- DualSense
+- Switch Pro
+- Generic HID gamepads and joysticks that follow the common gamepad report layout
+
+How hosted input is handled:
+
+- `TinyUSBHostManager` starts TinyUSB host mode and fans out callbacks to listeners.
+- `USBHostGamepadInput` listens for HID/XInput host reports.
+- Reports normalize into one shared hosted gamepad state.
+- That shared state is translated into normal FW-Glyph `InputState`.
+- FW-Glyph's existing profile remaps, SOCD handling, and game-mode logic then run as usual.
+
+Hosted default mappings:
+
+- hosted `L3 -> LT1`
+- hosted `R3 -> LT2`
+- those line up with FW-Glyph's common `modX/modY` usage
+
+If a developer wants different hosted defaults, change the centralized mapping table in:
+
+- [USBHostGamepadInput.cpp](/home/inferi/code/FW-Glyph/HAL/pico/src/input/USBHostGamepadInput.cpp)
+
+This is not yet a separate user-facing host remap UI. Normal FW-Glyph profile remaps still apply after hosted input is translated.
+
+### PlayStation Passthrough
+
+This branch now has device-side PlayStation passthrough backends plus host-side auth support.
+
+Backends:
+
+- `COMMS_BACKEND_PASSTHROUGH_PS4`
+- `COMMS_BACKEND_PASSTHROUGH_PS5`
+
+Key pieces:
+
+- `PlayStationBackend`
+- `USBHostAuthListener`
+- `USBHostAuthPassthrough`
+- `PlayStationAuthPassthrough`
+
+How it works:
+
+1. FW-Glyph presents itself as a PS4 or PS5-family HID device.
+2. Console auth/report requests are handled by `PlayStationBackend`.
+3. `PlayStationBackend` forwards auth traffic into `PlayStationAuthPassthrough`.
+4. `PlayStationAuthPassthrough` drives the attached host auth device through `USBHostAuthPassthrough` and `USBHostAuthListener`.
+
+What is ready:
+
+- firmware layers are present end-to-end
+- PS4/PS5 modes are selectable from the on-device menu
+- both normal and host builds compile
+
+What still needs hardware validation:
+
+- real PS4 console behavior
+- real PS5 console behavior
+- auth device compatibility edge cases
+
+### Xbox Auth And XInput
+
+The XInput device side is now closer to GP2040-CE.
+
+- `XInputBackend` uses a GP2040-style 4-interface Xbox 360 layout
+- Xbox auth is handled on the XInput path, not a separate backend
+- `XboxAuthPassthrough` routes vendor auth traffic to an attached Xbox auth-capable host device
+
+What is ready:
+
+- PC XInput behavior is working again
+- Xbox auth transport is wired in firmware
+
+What still needs hardware validation:
+
+- real Xbox console auth behavior
+- whether the current 4-interface shape needs more fidelity tweaks for specific hosts
+
+### On-Device Mode Selection
+
+The menu/UI now exposes the new PlayStation passthrough backends in addition to the original FW-Glyph USB modes.
+
+Available USB-facing families in this branch:
+
+- XInput
+- DInput
+- Nintendo Switch
+- PS4 passthrough
+- PS5 passthrough
+
+Selection does not require an auth dongle.
+
+- You can select PS4 or PS5 mode from the device menu with nothing attached to the host port.
+- Auth devices matter for real console acceptance, not for choosing the mode.
+
+### GP2040-Style Structure
+
+This branch intentionally moved several pieces closer to GP2040-CE's structure:
+
+- vendored TinyUSB source tree
+- vendored `pico_pio_usb`
+- host manager/listener model
+- repo-owned XInput host glue
+- repo-owned auth listeners and passthrough layers
+- GP2040-style 4-interface Xbox 360 descriptor shape
+
+The project still keeps repo-owned integration code where FW-Glyph behavior diverges from GP2040-CE:
+
+- device backends
+- hosted-input-to-FW-Glyph mapping
+- auth session policy
+- menu/config integration
 
 ### XInput Notes
 
