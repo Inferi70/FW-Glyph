@@ -1,6 +1,7 @@
 #ifndef _USB_USB_HOST_AUTH_LISTENER_HPP
 #define _USB_USB_HOST_AUTH_LISTENER_HPP
 
+#include "tusb.h"
 #include "usb/TinyUSBHostListener.hpp"
 
 enum class USBHostAuthDeviceType {
@@ -51,9 +52,24 @@ class USBHostAuthListener : public TinyUSBHostListener {
     bool requestP5SigningState(uint16_t len = 16);
     bool sendP5AuthPayload(const uint8_t *payload, uint16_t len);
 
+    bool requestXInput360Serial();
+    bool sendXInput360InitAuth(const uint8_t *payload, uint16_t len);
+    bool sendXInput360VerifyAuth(const uint8_t *payload, uint16_t len);
+    bool requestXInput360ChallengeResponse(uint16_t len);
+    bool requestXInput360State();
+    bool sendXInput360KeepAlive();
+    void xinputVendorComplete(uint8_t request, xfer_result_t result, uint32_t actual_len);
+
   private:
     bool hostGetReport(uint8_t report_id, void *report, uint16_t len);
     bool hostSetReport(uint8_t report_id, void *report, uint16_t len);
+    bool xinputVendorTransfer(
+        tusb_dir_t dir,
+        uint8_t request,
+        uint16_t value,
+        uint16_t len,
+        const uint8_t *payload
+    );
     void clear();
 
     USBHostAuthDeviceType _device_type = USBHostAuthDeviceType::NONE;
@@ -65,6 +81,7 @@ class USBHostAuthListener : public TinyUSBHostListener {
     uint16_t _last_len = 0;
     bool _awaiting_cb = false;
     uint8_t _last_buffer[64] = {};
+    tusb_control_request_t _xinput_control_request = {};
 };
 
 #endif

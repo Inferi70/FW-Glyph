@@ -1,4 +1,5 @@
 #include "usb/TinyUSBXInput.hpp"
+#include "usb/XboxAuthPassthrough.hpp"
 #include "device/usbd_pvt.h"
 #include "tusb_option.h"
 
@@ -219,6 +220,10 @@ bool xinput_vendor_control_xfer_cb(
     uint8_t stage,
     const tusb_control_request_t *request
 ) {
+    if (XboxAuthPassthrough::instance().handleVendorControl(rhport, stage, request)) {
+        return true;
+    }
+
     if (!xinput_dev) {
         return false;
     }

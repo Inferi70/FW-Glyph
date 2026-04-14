@@ -27,6 +27,7 @@
 #include "usb/USBHostAuthPassthrough.hpp"
 #include "usb/TinyUSBHostManager.hpp"
 #include "usb/USBHostAuthListener.hpp"
+#include "usb/XboxAuthPassthrough.hpp"
 
 #include <Adafruit_SSD1306.h>
 #include <config.pb.h>
@@ -119,6 +120,7 @@ void setup() {
     TinyUSBHostManager::instance().pushListener(&usb_host_gamepad_input);
     TinyUSBHostManager::instance().pushListener(&usb_host_auth_listener);
     USBHostAuthPassthrough::instance().attach(&usb_host_auth_listener);
+    XboxAuthPassthrough::instance().attach(&usb_host_auth_listener);
     TinyUSBHostManager::instance().start();
 
     if(backend_count == 0) {
@@ -140,6 +142,7 @@ void loop() {
     TinyUSBHostManager::instance().process();
     USBHostAuthPassthrough::instance().process();
     PlayStationAuthPassthrough::instance().process();
+    XboxAuthPassthrough::instance().process();
 
     if (current_kb_mode != nullptr) {
         current_kb_mode->SendReport(backends[0]->GetInputs());

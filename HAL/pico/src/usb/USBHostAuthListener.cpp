@@ -24,6 +24,28 @@ constexpr uint8_t P5_REPORT_SET_AUTH_PAYLOAD = 0xF0;
 constexpr uint8_t P5_REPORT_GET_SIGNATURE_NONCE = 0xF1;
 constexpr uint8_t P5_REPORT_GET_SIGNING_STATE = 0xF2;
 
+constexpr uint8_t X360_REQUEST_GET_SERIAL = 0x81;
+constexpr uint8_t X360_REQUEST_INIT_AUTH = 0x82;
+constexpr uint8_t X360_REQUEST_RESPOND_CHALLENGE = 0x83;
+constexpr uint8_t X360_REQUEST_AUTH_KEEPALIVE = 0x84;
+constexpr uint8_t X360_REQUEST_STATE = 0x86;
+constexpr uint8_t X360_REQUEST_VERIFY_AUTH = 0x87;
+
+constexpr uint16_t X360_WVALUE_CONSOLE_DATA = 0x0003;
+constexpr uint16_t X360_WVALUE_CONTROLLER_DATA = 0x005C;
+constexpr uint16_t X360_WVALUE_CONTROLLER_ID = 0x005B;
+constexpr uint16_t X360_WVALUE_NO_DATA = 0x0000;
+constexpr uint16_t X360_WINDEX_SECURITY = 0x0301;
+
+void xinput_vendor_complete_cb(tuh_xfer_t *xfer) {
+    auto *listener = reinterpret_cast<USBHostAuthListener *>(xfer->user_data);
+    if (listener == nullptr || xfer->setup == nullptr) {
+        return;
+    }
+
+    listener->xinputVendorComplete(xfer->setup->bRequest, xfer->result, xfer->actual_len);
+}
+
 } // namespace
 
 bool USBHostAuthListener::available() const {
@@ -187,11 +209,33 @@ bool USBHostAuthListener::hostGetReport(uint8_t report_id, void *report, uint16_
         memcpy(_last_buffer, report, len);
     }
 
-    bool ok = tuh_hid_get_report(_dev_addr, _instance, report_id, HID_REPORT_TYPE_FEATURE, _last_buffer, len);
-    if (!ok) {
-        _busy = false;
-        _awaiting_cb = false;
-    }
+    tusb_control_request_t request = {
+        .bmRequestType_bit =
+            {
+                .recipient = TUSB_REQ_RCPT_INTERFACE,
+                .type = TUSB_REQ_TYPE_CLASS,
+                .direction = TUSB_DIR_IN,
+            },
+        .bRequest = HID_REQ_CONTROL_GET_REPORT,
+        .wValue = tu_htole16(tu_u16(HID_REPORT_TYPE_FEATURE, report_id)),
+        .wIndex = tu_htole16(static_cast<uint16_t>(_interface_number)),
+        .wLength = len,
+    };
+
+    xfer_result_t result = XFER_RESULT_FAILED;
+    tuh_xfer_t xfer = {
+        .daddr = _dev_addr,
+        .ep_addr = 0,
+        .setup = &request,
+        .buffer = _last_buffer,
+        .complete_cb = nullptr,
+        .user_data = reinterpret_cast<uintptr_t>(&result),
+    };
+
+    bool ok = tuh_control_xfer(&xfer) && result == XFER_RESULT_SUCCESS;
+    _busy = false;
+    _awaiting_cb = false;
+    _last_len = ok ? len : 0;
     return ok;
 }
 
@@ -290,6 +334,126 @@ bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len
 
     memcpy(_last_buffer, payload, len);
     return hostSetReport(P5_REPORT_SET_AUTH_PAYLOAD, _last_buffer, len);
+}
+
+bool USBHostAuthListener::requestXInput360Serial() {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360) {
+        return false;
+    }
+
+    return xinputVendorTransfer(
+        TUSB_DIR_IN,
+        X360_REQUEST_GET_SERIAL,
+        TU_U16(X360_WVALUE_CONTROLLER_ID, static_cast<uint8_t>(29 - 6)),
+        29,
+        nullptr
+    );
+}
+
+bool USBHostAuthListener::sendXInput360InitAuth(const uint8_t *payload, uint16_t len) {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360 || payload == nullptr) {
+        return false;
+    }
+
+    return xinputVendorTransfer(TUSB_DIR_OUT, X360_REQUEST_INIT_AUTH, X360_WVALUE_CONSOLE_DATA, len, payload);
+}
+
+bool USBHostAuthListener::sendXInput360VerifyAuth(const uint8_t *payload, uint16_t len) {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360 || payload == nullptr) {
+        return false;
+    }
+
+    return xinputVendorTransfer(TUSB_DIR_OUT, X360_REQUEST_VERIFY_AUTH, X360_WVALUE_CONSOLE_DATA, len, payload);
+}
+
+bool USBHostAuthListener::requestXInput360ChallengeResponse(uint16_t len) {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360) {
+        return false;
+    }
+
+    return xinputVendorTransfer(
+        TUSB_DIR_IN,
+        X360_REQUEST_RESPOND_CHALLENGE,
+        TU_U16(X360_WVALUE_CONTROLLER_DATA, static_cast<uint8_t>(len - 6)),
+        len,
+        nullptr
+    );
+}
+
+bool USBHostAuthListener::requestXInput360State() {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360) {
+        return false;
+    }
+
+    return xinputVendorTransfer(TUSB_DIR_IN, X360_REQUEST_STATE, X360_WVALUE_NO_DATA, 2, nullptr);
+}
+
+bool USBHostAuthListener::sendXInput360KeepAlive() {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360) {
+        return false;
+    }
+
+    return xinputVendorTransfer(TUSB_DIR_IN, X360_REQUEST_AUTH_KEEPALIVE, X360_WVALUE_CONSOLE_DATA, 0, nullptr);
+}
+
+bool USBHostAuthListener::xinputVendorTransfer(
+    tusb_dir_t dir,
+    uint8_t request,
+    uint16_t value,
+    uint16_t len,
+    const uint8_t *payload
+) {
+    if (_device_type != USBHostAuthDeviceType::XINPUT_360 || !tuh_ready(_dev_addr) || _busy || _awaiting_cb ||
+        len > sizeof(_last_buffer)) {
+        return false;
+    }
+
+    _busy = true;
+    _awaiting_cb = true;
+    _last_report_id = request;
+    _last_len = 0;
+    memset(_last_buffer, 0, sizeof(_last_buffer));
+    if (payload != nullptr && len > 0) {
+        memcpy(_last_buffer, payload, len);
+    }
+
+    _xinput_control_request = {
+        .bmRequestType_bit =
+            {
+                .recipient = TUSB_REQ_RCPT_INTERFACE,
+                .type = TUSB_REQ_TYPE_VENDOR,
+                .direction = dir,
+            },
+        .bRequest = request,
+        .wValue = value,
+        .wIndex = X360_WINDEX_SECURITY,
+        .wLength = len,
+    };
+
+    tuh_xfer_t xfer = {
+        .daddr = _dev_addr,
+        .ep_addr = 0,
+        .setup = &_xinput_control_request,
+        .buffer = _last_buffer,
+        .complete_cb = xinput_vendor_complete_cb,
+        .user_data = reinterpret_cast<uintptr_t>(this),
+    };
+
+    if (!tuh_control_xfer(&xfer)) {
+        _busy = false;
+        _awaiting_cb = false;
+        _last_len = 0;
+        return false;
+    }
+
+    return true;
+}
+
+void USBHostAuthListener::xinputVendorComplete(uint8_t request, xfer_result_t result, uint32_t actual_len) {
+    _busy = false;
+    _awaiting_cb = false;
+    _last_report_id = request;
+    _last_len = (result == XFER_RESULT_SUCCESS) ? static_cast<uint16_t>(actual_len) : 0;
 }
 
 #else
@@ -424,6 +588,35 @@ bool USBHostAuthListener::sendP5AuthPayload(const uint8_t *payload, uint16_t len
     return false;
 }
 
+bool USBHostAuthListener::requestXInput360Serial() {
+    return false;
+}
+
+bool USBHostAuthListener::sendXInput360InitAuth(const uint8_t *payload, uint16_t len) {
+    (void) payload;
+    (void) len;
+    return false;
+}
+
+bool USBHostAuthListener::sendXInput360VerifyAuth(const uint8_t *payload, uint16_t len) {
+    (void) payload;
+    (void) len;
+    return false;
+}
+
+bool USBHostAuthListener::requestXInput360ChallengeResponse(uint16_t len) {
+    (void) len;
+    return false;
+}
+
+bool USBHostAuthListener::requestXInput360State() {
+    return false;
+}
+
+bool USBHostAuthListener::sendXInput360KeepAlive() {
+    return false;
+}
+
 bool USBHostAuthListener::hostGetReport(uint8_t report_id, void *report, uint16_t len) {
     (void) report_id;
     (void) report;
@@ -436,6 +629,27 @@ bool USBHostAuthListener::hostSetReport(uint8_t report_id, void *report, uint16_
     (void) report;
     (void) len;
     return false;
+}
+
+bool USBHostAuthListener::xinputVendorTransfer(
+    tusb_dir_t dir,
+    uint8_t request,
+    uint16_t value,
+    uint16_t len,
+    const uint8_t *payload
+) {
+    (void) dir;
+    (void) request;
+    (void) value;
+    (void) len;
+    (void) payload;
+    return false;
+}
+
+void USBHostAuthListener::xinputVendorComplete(uint8_t request, xfer_result_t result, uint32_t actual_len) {
+    (void) request;
+    (void) result;
+    (void) actual_len;
 }
 
 void USBHostAuthListener::clear() {}
