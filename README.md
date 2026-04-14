@@ -77,8 +77,9 @@ Current status:
 - DS4-class HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - DualSense HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
 - Switch Pro HID reports are now also translated into FW-Glyph raw input slots through the same host input bridge.
-- The current host bridge still uses fixed default raw-button mappings rather than a normalized per-device configuration layer.
-- Generic HID fallback parsing is still the next expansion area.
+- Generic HID gamepads and joysticks now fall back through TinyUSB's standard gamepad report layout.
+- Hosted controllers now normalize into one shared gamepad state before entering FW-Glyph's existing remap and mode pipeline.
+- Hosted default button targets are still centralized in code rather than exposed as a user-facing host remap UI.
 - Repo-owned host auth detection and transport now exist through `USBHostAuthListener`.
 - The current auth listener can detect PS4-style HID auth devices, P5 auth devices, and XInput 360-class host devices.
 - PS4/P5 feature-report auth requests are now routed through TinyUSB host HID get/set report helpers in the host-enabled build.
@@ -89,6 +90,8 @@ Current status:
 - `COMMS_BACKEND_PASSTHROUGH_PS4` and `COMMS_BACKEND_PASSTHROUGH_PS5` now exist as PS4-family HID device backends.
 - Those backends use repo-owned HID get/set report callbacks and consume `PlayStationAuthPassthrough`.
 - End-to-end passthrough is now wired in firmware, but it still needs real hardware validation on PS4/PS5 hosts.
+- `XInputBackend` now uses a GP2040-style 4-interface Xbox 360 descriptor and routes console auth requests through `XboxAuthPassthrough`.
+- Xbox auth passthrough is now wired through the existing XInput device path and still needs real Xbox hardware validation.
 
 ### XInput Notes
 

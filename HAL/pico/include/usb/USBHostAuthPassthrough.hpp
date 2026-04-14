@@ -36,6 +36,11 @@ class USBHostAuthPassthrough {
 
     USBHostAuthPassthrough() = default;
 
+    bool queueRequest(RequestType type, uint8_t report_id, const uint8_t *payload, uint16_t len);
+    void clearRequest();
+    void clearResponseState();
+    void completeInFlight();
+
     bool dispatchPS4Get(uint8_t report_id, const uint8_t *payload, uint16_t len);
     bool dispatchPS4Set(uint8_t report_id, const uint8_t *payload, uint16_t len);
     bool dispatchP5Get(uint8_t report_id, const uint8_t *payload, uint16_t len);

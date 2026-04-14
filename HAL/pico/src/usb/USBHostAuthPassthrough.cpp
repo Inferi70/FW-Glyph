@@ -27,18 +27,8 @@ void USBHostAuthPassthrough::attach(USBHostAuthListener *listener) {
 }
 
 void USBHostAuthPassthrough::reset() {
-    _request_report_id = 0;
-    _request_len = 0;
-    memset(_request_buffer, 0, sizeof(_request_buffer));
-    _request_type = RequestType::NONE;
-    _request_pending = false;
-    _request_in_flight = false;
-
-    _response_ready = false;
-    _response_was_get = false;
-    _response_report_id = 0;
-    _response_len = 0;
-    memset(_response_buffer, 0, sizeof(_response_buffer));
+    clearRequest();
+    clearResponseState();
 }
 
 bool USBHostAuthPassthrough::ready() const {
@@ -50,43 +40,11 @@ USBHostAuthDeviceType USBHostAuthPassthrough::deviceType() const {
 }
 
 bool USBHostAuthPassthrough::submitGetReport(uint8_t report_id, const uint8_t *payload, uint16_t len) {
-    if (_listener == nullptr || len > sizeof(_request_buffer) || _request_pending || _request_in_flight) {
-        return false;
-    }
-
-    _request_report_id = report_id;
-    _request_len = len;
-    _request_type = RequestType::GET;
-    _request_pending = true;
-    _response_ready = false;
-    _response_was_get = false;
-    _response_report_id = 0;
-    _response_len = 0;
-    memset(_request_buffer, 0, sizeof(_request_buffer));
-    if (payload != nullptr && len > 0) {
-        memcpy(_request_buffer, payload, len);
-    }
-    return true;
+    return queueRequest(RequestType::GET, report_id, payload, len);
 }
 
 bool USBHostAuthPassthrough::submitSetReport(uint8_t report_id, const uint8_t *payload, uint16_t len) {
-    if (_listener == nullptr || len > sizeof(_request_buffer) || _request_pending || _request_in_flight) {
-        return false;
-    }
-
-    _request_report_id = report_id;
-    _request_len = len;
-    _request_type = RequestType::SET;
-    _request_pending = true;
-    _response_ready = false;
-    _response_was_get = false;
-    _response_report_id = 0;
-    _response_len = 0;
-    memset(_request_buffer, 0, sizeof(_request_buffer));
-    if (payload != nullptr && len > 0) {
-        memcpy(_request_buffer, payload, len);
-    }
-    return true;
+    return queueRequest(RequestType::SET, report_id, payload, len);
 }
 
 bool USBHostAuthPassthrough::requestInFlight() const {
@@ -122,11 +80,63 @@ bool USBHostAuthPassthrough::copyResponse(uint8_t *dst, uint16_t max_len, uint16
 }
 
 void USBHostAuthPassthrough::clearResponse() {
+    clearResponseState();
+}
+
+bool USBHostAuthPassthrough::queueRequest(
+    RequestType type,
+    uint8_t report_id,
+    const uint8_t *payload,
+    uint16_t len
+) {
+    if (_listener == nullptr || len > sizeof(_request_buffer) || _request_pending || _request_in_flight) {
+        return false;
+    }
+
+    _request_report_id = report_id;
+    _request_len = len;
+    _request_type = type;
+    _request_pending = true;
+    clearResponseState();
+    memset(_request_buffer, 0, sizeof(_request_buffer));
+    if (payload != nullptr && len > 0) {
+        memcpy(_request_buffer, payload, len);
+    }
+    return true;
+}
+
+void USBHostAuthPassthrough::clearRequest() {
+    _request_report_id = 0;
+    _request_len = 0;
+    _request_type = RequestType::NONE;
+    _request_pending = false;
+    _request_in_flight = false;
+    memset(_request_buffer, 0, sizeof(_request_buffer));
+}
+
+void USBHostAuthPassthrough::clearResponseState() {
     _response_ready = false;
     _response_was_get = false;
     _response_report_id = 0;
     _response_len = 0;
     memset(_response_buffer, 0, sizeof(_response_buffer));
+}
+
+void USBHostAuthPassthrough::completeInFlight() {
+    if (_request_type == RequestType::GET &&
+        _listener->lastReportId() == _request_report_id &&
+        _listener->lastLength() <= sizeof(_response_buffer)) {
+        _response_ready = true;
+        _response_was_get = true;
+        _response_report_id = _listener->lastReportId();
+        _response_len = _listener->lastLength();
+        memset(_response_buffer, 0, sizeof(_response_buffer));
+        if (_response_len > 0) {
+            memcpy(_response_buffer, _listener->lastBuffer(), _response_len);
+        }
+    }
+
+    clearRequest();
 }
 
 bool USBHostAuthPassthrough::dispatchPS4Get(uint8_t report_id, const uint8_t *payload, uint16_t len) {
@@ -190,24 +200,7 @@ void USBHostAuthPassthrough::process() {
             return;
         }
 
-        _request_in_flight = false;
-        if (_request_type == RequestType::GET &&
-            _listener->lastReportId() == _request_report_id &&
-            _listener->lastLength() <= sizeof(_response_buffer)) {
-            _response_ready = true;
-            _response_was_get = true;
-            _response_report_id = _listener->lastReportId();
-            _response_len = _listener->lastLength();
-            memset(_response_buffer, 0, sizeof(_response_buffer));
-            if (_response_len > 0) {
-                memcpy(_response_buffer, _listener->lastBuffer(), _response_len);
-            }
-        }
-
-        _request_type = RequestType::NONE;
-        _request_report_id = 0;
-        _request_len = 0;
-        memset(_request_buffer, 0, sizeof(_request_buffer));
+        completeInFlight();
         return;
     }
 
@@ -233,11 +226,7 @@ void USBHostAuthPassthrough::process() {
     }
 
     if (!dispatched) {
-        _request_pending = false;
-        _request_type = RequestType::NONE;
-        _request_report_id = 0;
-        _request_len = 0;
-        memset(_request_buffer, 0, sizeof(_request_buffer));
+        clearRequest();
         return;
     }
 
