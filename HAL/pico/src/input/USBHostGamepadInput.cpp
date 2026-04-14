@@ -186,6 +186,50 @@ typedef struct __attribute__((packed)) {
 
 constexpr uint8_t SWITCH_INIT_REPORT[10] = { SWITCH_REPORT_CONFIGURATION, SWITCH_SUBCMD_IDENTIFY };
 
+struct HostedGlyphMapping {
+    Button dpad_left;
+    Button dpad_right;
+    Button dpad_down;
+    Button dpad_up;
+    Button face_a;
+    Button face_b;
+    Button face_x;
+    Button face_y;
+    Button shoulder_l;
+    Button shoulder_r;
+    Button trigger_l;
+    Button trigger_r;
+    Button start;
+    Button back;
+    Button home;
+    Button mod_x;
+    Button mod_y;
+    Button right_stick_click;
+};
+
+// Default hosted-controller layout into FW-Glyph raw inputs.
+// Change these targets if you want a different hosted default without touching parser code.
+constexpr HostedGlyphMapping DEFAULT_HOSTED_GLYPH_MAPPING = {
+    .dpad_left = BTN_LF3,
+    .dpad_right = BTN_LF1,
+    .dpad_down = BTN_LF2,
+    .dpad_up = BTN_RF4,
+    .face_a = BTN_RF1,
+    .face_b = BTN_RF2,
+    .face_x = BTN_RF5,
+    .face_y = BTN_RF6,
+    .shoulder_l = BTN_RF8,
+    .shoulder_r = BTN_RF7,
+    .trigger_l = BTN_RF4,
+    .trigger_r = BTN_RF3,
+    .start = BTN_MB7,
+    .back = BTN_MB6,
+    .home = BTN_MB5,
+    .mod_x = BTN_LT1,
+    .mod_y = BTN_LT2,
+    .right_stick_click = BTN_RT1,
+};
+
 uint8_t axis_to_uint8(int16_t value, bool invert = false) {
     uint16_t shifted = static_cast<uint16_t>(value - INT16_MIN);
     uint8_t axis = static_cast<uint8_t>(shifted >> 8);
@@ -633,27 +677,27 @@ bool USBHostGamepadInput::buttonPressed(HostedButtonMask mask) const {
 }
 
 void USBHostGamepadInput::applyNormalizedState(InputState &inputs) {
-    set_button(inputs.buttons, BTN_LF3, buttonPressed(HOST_BTN_DPAD_LEFT));
-    set_button(inputs.buttons, BTN_LF1, buttonPressed(HOST_BTN_DPAD_RIGHT));
-    set_button(inputs.buttons, BTN_LF2, buttonPressed(HOST_BTN_DPAD_DOWN));
-    set_button(inputs.buttons, BTN_RF4, buttonPressed(HOST_BTN_DPAD_UP));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.dpad_left, buttonPressed(HOST_BTN_DPAD_LEFT));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.dpad_right, buttonPressed(HOST_BTN_DPAD_RIGHT));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.dpad_down, buttonPressed(HOST_BTN_DPAD_DOWN));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.dpad_up, buttonPressed(HOST_BTN_DPAD_UP));
 
-    set_button(inputs.buttons, BTN_RF1, buttonPressed(HOST_BTN_A));
-    set_button(inputs.buttons, BTN_RF2, buttonPressed(HOST_BTN_B));
-    set_button(inputs.buttons, BTN_RF5, buttonPressed(HOST_BTN_X));
-    set_button(inputs.buttons, BTN_RF6, buttonPressed(HOST_BTN_Y));
-    set_button(inputs.buttons, BTN_RF8, buttonPressed(HOST_BTN_LB));
-    set_button(inputs.buttons, BTN_RF7, buttonPressed(HOST_BTN_RB));
-    set_button(inputs.buttons, BTN_RF4, _state.lt > TRIGGER_THRESHOLD);
-    set_button(inputs.buttons, BTN_RF3, _state.rt > TRIGGER_THRESHOLD);
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.face_a, buttonPressed(HOST_BTN_A));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.face_b, buttonPressed(HOST_BTN_B));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.face_x, buttonPressed(HOST_BTN_X));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.face_y, buttonPressed(HOST_BTN_Y));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.shoulder_l, buttonPressed(HOST_BTN_LB));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.shoulder_r, buttonPressed(HOST_BTN_RB));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.trigger_l, _state.lt > TRIGGER_THRESHOLD);
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.trigger_r, _state.rt > TRIGGER_THRESHOLD);
 
-    set_button(inputs.buttons, BTN_MB7, buttonPressed(HOST_BTN_START));
-    set_button(inputs.buttons, BTN_MB6, buttonPressed(HOST_BTN_BACK));
-    set_button(inputs.buttons, BTN_MB5, buttonPressed(HOST_BTN_HOME));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.start, buttonPressed(HOST_BTN_START));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.back, buttonPressed(HOST_BTN_BACK));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.home, buttonPressed(HOST_BTN_HOME));
     set_button(inputs.buttons, BTN_MB4, false);
-    set_button(inputs.buttons, BTN_LT1, buttonPressed(HOST_BTN_LS));
-    set_button(inputs.buttons, BTN_LT2, buttonPressed(HOST_BTN_RS));
-    set_button(inputs.buttons, BTN_RT1, false);
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.mod_x, buttonPressed(HOST_BTN_LS));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.mod_y, buttonPressed(HOST_BTN_RS));
+    set_button(inputs.buttons, DEFAULT_HOSTED_GLYPH_MAPPING.right_stick_click, false);
 
     set_button(inputs.buttons, BTN_RT3, _state.rx < (128 - (STICK_DIGITAL_THRESHOLD >> 8)));
     set_button(inputs.buttons, BTN_RT5, _state.rx > (128 + (STICK_DIGITAL_THRESHOLD >> 8)));
