@@ -36,6 +36,7 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
         DS4_HID,
         DUALSENSE_HID,
         SWITCH_PRO_HID,
+        GENERIC_HID,
     };
 
     enum HostedButtonMask : uint32_t {
@@ -72,11 +73,13 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     void applyDs4Report(const uint8_t *report, uint16_t len);
     void applyDualSenseReport(const uint8_t *report, uint16_t len);
     void applySwitchProReport(const uint8_t *report, uint16_t len);
+    void applyGenericHidReport(const uint8_t *report, uint16_t len);
     void startSwitchProInit();
     void handleSwitchProInitReport(const uint8_t *report, uint16_t len);
     bool hostSendReport(uint8_t report_id, const void *report, uint16_t len);
     uint8_t nextSwitchReportCounter();
     void setDpadFromHat(uint8_t hat);
+    void setDpadFromGamepadHat(uint8_t hat);
     void clearButtons(uint32_t mask);
     void setButtons(uint32_t mask, bool enabled);
     bool buttonPressed(HostedButtonMask mask) const;
@@ -89,6 +92,7 @@ class USBHostGamepadInput : public InputSource, public TinyUSBHostListener {
     uint8_t _type = 0;
     uint16_t _last_vid = 0;
     uint16_t _last_pid = 0;
+    uint8_t _generic_report_id = 0;
     bool _switch_pro_ready = false;
     uint8_t _switch_report_counter = 0;
     HostedGamepadState _state = {};

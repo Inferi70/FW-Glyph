@@ -1,10 +1,15 @@
 #include "input/USBHostGamepadInput.hpp"
 
+#include "class/hid/hid.h"
 #include "usb/TinyUSBXInputHost.h"
 #include "util/state_util.hpp"
 
 #include <climits>
 #include <cstring>
+
+#if CFG_TUH_ENABLED
+#include "third_party/tinyusb_gp2040/src/class/hid/hid_host.h"
+#endif
 
 namespace {
 
@@ -251,6 +256,7 @@ void USBHostGamepadInput::setup() {
     _type = 0;
     _last_vid = 0;
     _last_pid = 0;
+    _generic_report_id = 0;
     resetState();
 }
 
@@ -290,6 +296,7 @@ void USBHostGamepadInput::unmount(uint8_t dev_addr) {
     _type = 0;
     _last_vid = 0;
     _last_pid = 0;
+    _generic_report_id = 0;
 }
 
 void USBHostGamepadInput::hidMount(
@@ -305,22 +312,44 @@ void USBHostGamepadInput::hidMount(
         return;
     }
 
-    if (_last_vid != SONY_VENDOR_ID ||
-        (_last_pid != DS4_PRODUCT_ID && _last_pid != DS4_ORG_PRODUCT_ID && _last_pid != DUALSENSE_PRODUCT_ID)) {
-        if (_last_vid != NINTENDO_VENDOR_ID || _last_pid != SWITCH_PRO_PRODUCT_ID) {
+    bool is_known_sony = _last_vid == SONY_VENDOR_ID &&
+                         (_last_pid == DS4_PRODUCT_ID || _last_pid == DS4_ORG_PRODUCT_ID ||
+                          _last_pid == DUALSENSE_PRODUCT_ID);
+    bool is_switch_pro = _last_vid == NINTENDO_VENDOR_ID && _last_pid == SWITCH_PRO_PRODUCT_ID;
+    bool is_generic_hid = false;
+    uint8_t generic_report_id = 0;
+
+    if (!is_known_sony && !is_switch_pro) {
+        #if CFG_TUH_ENABLED
+        tuh_hid_report_info_t report_info[4];
+        uint8_t report_count = tuh_hid_parse_report_descriptor(report_info, 4, desc_report, desc_len);
+        for (uint8_t i = 0; i < report_count; i++) {
+            if (report_info[i].usage_page == HID_USAGE_PAGE_DESKTOP &&
+                (report_info[i].usage == HID_USAGE_DESKTOP_GAMEPAD ||
+                 report_info[i].usage == HID_USAGE_DESKTOP_JOYSTICK)) {
+                is_generic_hid = true;
+                generic_report_id = report_info[i].report_id;
+                break;
+            }
+        }
+        #endif
+        if (!is_generic_hid) {
             return;
         }
     }
 
     _active = true;
-    if (_last_vid == NINTENDO_VENDOR_ID && _last_pid == SWITCH_PRO_PRODUCT_ID) {
+    if (is_switch_pro) {
         _source = SourceType::SWITCH_PRO_HID;
+    } else if (is_generic_hid) {
+        _source = SourceType::GENERIC_HID;
     } else {
         _source = (_last_pid == DUALSENSE_PRODUCT_ID) ? SourceType::DUALSENSE_HID : SourceType::DS4_HID;
     }
     _dev_addr = dev_addr;
     _instance = instance;
     _type = 0;
+    _generic_report_id = generic_report_id;
     resetState();
 
     if (_source == SourceType::SWITCH_PRO_HID) {
@@ -330,7 +359,7 @@ void USBHostGamepadInput::hidMount(
 
 void USBHostGamepadInput::hidUnmount(uint8_t dev_addr, uint8_t instance) {
     if (!_active || (_source != SourceType::DS4_HID && _source != SourceType::DUALSENSE_HID &&
-                     _source != SourceType::SWITCH_PRO_HID) ||
+                     _source != SourceType::SWITCH_PRO_HID && _source != SourceType::GENERIC_HID) ||
         dev_addr != _dev_addr || instance != _instance) {
         return;
     }
@@ -339,6 +368,7 @@ void USBHostGamepadInput::hidUnmount(uint8_t dev_addr, uint8_t instance) {
     _source = SourceType::NONE;
     _dev_addr = 0;
     _instance = 0;
+    _generic_report_id = 0;
 }
 
 void USBHostGamepadInput::hidReportReceived(
@@ -348,13 +378,15 @@ void USBHostGamepadInput::hidReportReceived(
     uint16_t len
 ) {
     if (!_active || (_source != SourceType::DS4_HID && _source != SourceType::DUALSENSE_HID &&
-                     _source != SourceType::SWITCH_PRO_HID) ||
+                     _source != SourceType::SWITCH_PRO_HID && _source != SourceType::GENERIC_HID) ||
         dev_addr != _dev_addr || instance != _instance) {
         return;
     }
 
     if (_source == SourceType::SWITCH_PRO_HID) {
         applySwitchProReport(report, len);
+    } else if (_source == SourceType::GENERIC_HID) {
+        applyGenericHidReport(report, len);
     } else if (_source == SourceType::DUALSENSE_HID) {
         applyDualSenseReport(report, len);
     } else {
@@ -389,6 +421,7 @@ void USBHostGamepadInput::xinputUnmount(uint8_t dev_addr, uint8_t instance) {
     _dev_addr = 0;
     _instance = 0;
     _type = 0;
+    _generic_report_id = 0;
 }
 
 void USBHostGamepadInput::xinputReportReceived(
@@ -477,6 +510,39 @@ void USBHostGamepadInput::setDpadFromHat(uint8_t hat) {
             setButtons(HOST_BTN_DPAD_UP | HOST_BTN_DPAD_LEFT, true);
             break;
         default:
+            break;
+    }
+}
+
+void USBHostGamepadInput::setDpadFromGamepadHat(uint8_t hat) {
+    switch (hat) {
+        case GAMEPAD_HAT_UP:
+            setDpadFromHat(PS4_HAT_UP);
+            break;
+        case GAMEPAD_HAT_UP_RIGHT:
+            setDpadFromHat(PS4_HAT_UPRIGHT);
+            break;
+        case GAMEPAD_HAT_RIGHT:
+            setDpadFromHat(PS4_HAT_RIGHT);
+            break;
+        case GAMEPAD_HAT_DOWN_RIGHT:
+            setDpadFromHat(PS4_HAT_DOWNRIGHT);
+            break;
+        case GAMEPAD_HAT_DOWN:
+            setDpadFromHat(PS4_HAT_DOWN);
+            break;
+        case GAMEPAD_HAT_DOWN_LEFT:
+            setDpadFromHat(PS4_HAT_DOWNLEFT);
+            break;
+        case GAMEPAD_HAT_LEFT:
+            setDpadFromHat(PS4_HAT_LEFT);
+            break;
+        case GAMEPAD_HAT_UP_LEFT:
+            setDpadFromHat(PS4_HAT_UPLEFT);
+            break;
+        case GAMEPAD_HAT_CENTERED:
+        default:
+            setDpadFromHat(0x0F);
             break;
     }
 }
@@ -629,6 +695,40 @@ void USBHostGamepadInput::applySwitchProReport(const uint8_t *report, uint16_t l
     _state.ly = static_cast<uint8_t>(~(switch_report.inputs.left_stick.getY() >> 4));
     _state.rx = static_cast<uint8_t>(switch_report.inputs.right_stick.getX() >> 4);
     _state.ry = static_cast<uint8_t>(~(switch_report.inputs.right_stick.getY() >> 4));
+}
+
+void USBHostGamepadInput::applyGenericHidReport(const uint8_t *report, uint16_t len) {
+    uint8_t offset = 0;
+    if (_generic_report_id != 0) {
+        if (len < (sizeof(hid_gamepad_report_t) + 1) || report[0] != _generic_report_id) {
+            return;
+        }
+        offset = 1;
+    } else if (len < sizeof(hid_gamepad_report_t)) {
+        return;
+    }
+
+    hid_gamepad_report_t gamepad = {};
+    memcpy(&gamepad, report + offset, sizeof(gamepad));
+
+    setDpadFromGamepadHat(gamepad.hat);
+    setButtons(HOST_BTN_A, gamepad.buttons & GAMEPAD_BUTTON_A);
+    setButtons(HOST_BTN_B, gamepad.buttons & GAMEPAD_BUTTON_B);
+    setButtons(HOST_BTN_X, gamepad.buttons & GAMEPAD_BUTTON_X);
+    setButtons(HOST_BTN_Y, gamepad.buttons & GAMEPAD_BUTTON_Y);
+    setButtons(HOST_BTN_LB, gamepad.buttons & GAMEPAD_BUTTON_TL);
+    setButtons(HOST_BTN_RB, gamepad.buttons & GAMEPAD_BUTTON_TR);
+    setButtons(HOST_BTN_START, gamepad.buttons & GAMEPAD_BUTTON_START);
+    setButtons(HOST_BTN_BACK, gamepad.buttons & GAMEPAD_BUTTON_SELECT);
+    setButtons(HOST_BTN_HOME, gamepad.buttons & GAMEPAD_BUTTON_MODE);
+    setButtons(HOST_BTN_LS, gamepad.buttons & GAMEPAD_BUTTON_THUMBL);
+    setButtons(HOST_BTN_RS, gamepad.buttons & GAMEPAD_BUTTON_THUMBR);
+    _state.lt = static_cast<uint8_t>(static_cast<int16_t>(gamepad.rx) + 128);
+    _state.rt = static_cast<uint8_t>(static_cast<int16_t>(gamepad.ry) + 128);
+    _state.lx = static_cast<uint8_t>(static_cast<int16_t>(gamepad.x) + 128);
+    _state.ly = static_cast<uint8_t>(127 - static_cast<int16_t>(gamepad.y));
+    _state.rx = static_cast<uint8_t>(static_cast<int16_t>(gamepad.z) + 128);
+    _state.ry = static_cast<uint8_t>(127 - static_cast<int16_t>(gamepad.rz));
 }
 
 void USBHostGamepadInput::clearMappedInputs(InputState &inputs) {
