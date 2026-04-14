@@ -34,6 +34,8 @@ void ConfigMenu::HandleControls(
                 case COMMS_BACKEND_DINPUT:
                 case COMMS_BACKEND_XINPUT:
                 case COMMS_BACKEND_NINTENDO_SWITCH:
+                case COMMS_BACKEND_PASSTHROUGH_PS4:
+                case COMMS_BACKEND_PASSTHROUGH_PS5:
                     _highlighted_menu_item = max(0, _highlighted_menu_item - 1);
                     break;
                 default:
@@ -53,6 +55,8 @@ void ConfigMenu::HandleControls(
                 case COMMS_BACKEND_DINPUT:
                 case COMMS_BACKEND_XINPUT:
                 case COMMS_BACKEND_NINTENDO_SWITCH:
+                case COMMS_BACKEND_PASSTHROUGH_PS4:
+                case COMMS_BACKEND_PASSTHROUGH_PS5:
                     _highlighted_menu_item =
                         min(_current_menu_page->items_count - 1, _highlighted_menu_item + 1);
                     break;
@@ -142,6 +146,8 @@ void ConfigMenu::UpdateDisplay(IntegratedDisplay *instance, Adafruit_GFX &displa
             case COMMS_BACKEND_DINPUT:
             case COMMS_BACKEND_XINPUT:
             case COMMS_BACKEND_NINTENDO_SWITCH:
+            case COMMS_BACKEND_PASSTHROUGH_PS4:
+            case COMMS_BACKEND_PASSTHROUGH_PS5:
                 usb = true;
                 break;
             default:

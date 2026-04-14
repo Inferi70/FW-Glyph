@@ -29,7 +29,9 @@ DefaultConfigMenu::DefaultConfigMenu(
             }
         } else if (backend_config.backend_id != COMMS_BACKEND_XINPUT &&
             backend_config.backend_id != COMMS_BACKEND_DINPUT &&
-            backend_config.backend_id != COMMS_BACKEND_NINTENDO_SWITCH) {
+            backend_config.backend_id != COMMS_BACKEND_NINTENDO_SWITCH &&
+            backend_config.backend_id != COMMS_BACKEND_PASSTHROUGH_PS4 &&
+            backend_config.backend_id != COMMS_BACKEND_PASSTHROUGH_PS5) {
             continue;
         }
 
@@ -60,7 +62,9 @@ DefaultConfigMenu::DefaultConfigMenu(
             CommunicationBackendId primary_backend_id = _backends[0]->BackendId();
             if ( !(primary_backend_id == COMMS_BACKEND_DINPUT
                     || primary_backend_id == COMMS_BACKEND_XINPUT
-                    || primary_backend_id == COMMS_BACKEND_NINTENDO_SWITCH) &&
+                    || primary_backend_id == COMMS_BACKEND_NINTENDO_SWITCH
+                    || primary_backend_id == COMMS_BACKEND_PASSTHROUGH_PS4
+                    || primary_backend_id == COMMS_BACKEND_PASSTHROUGH_PS5) &&
                 mode_config.mode_id == MODE_KEYBOARD) {
                 continue;
             }

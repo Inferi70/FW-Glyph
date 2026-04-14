@@ -20,6 +20,8 @@ GlyphConfigMenu::GlyphConfigMenu(
         case COMMS_BACKEND_XINPUT:
         case COMMS_BACKEND_DINPUT:
         case COMMS_BACKEND_NINTENDO_SWITCH:
+        case COMMS_BACKEND_PASSTHROUGH_PS4:
+        case COMMS_BACKEND_PASSTHROUGH_PS5:
             is_in_usb_mode = true;
             break;
         default: 

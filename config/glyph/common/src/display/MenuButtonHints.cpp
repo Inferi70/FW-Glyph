@@ -130,6 +130,8 @@ const unsigned char *currentInputIcon(OutputState buttons, CommunicationBackendI
     if(buttons.start) {
         if(backend == COMMS_BACKEND_NINTENDO_SWITCH) {
             return Bitmap_Plus_16;
+        } else if (backend == COMMS_BACKEND_PASSTHROUGH_PS4 || backend == COMMS_BACKEND_PASSTHROUGH_PS5) {
+            return Bitmap_Start_16;
         } else if (backend == COMMS_BACKEND_XINPUT || backend == COMMS_BACKEND_DINPUT) {
             return Bitmap_XB_Start_16;
         }
@@ -140,6 +142,8 @@ const unsigned char *currentInputIcon(OutputState buttons, CommunicationBackendI
     if(buttons.select) {
         if(backend == COMMS_BACKEND_NINTENDO_SWITCH) {
             return Bitmap_Minus_16;
+        } else if (backend == COMMS_BACKEND_PASSTHROUGH_PS4 || backend == COMMS_BACKEND_PASSTHROUGH_PS5) {
+            return Bitmap_SWShare_16;
         } else if (backend == COMMS_BACKEND_XINPUT || backend == COMMS_BACKEND_DINPUT) {
             return Bitmap_XB_Back_16;
         }
@@ -153,6 +157,8 @@ const unsigned char *currentInputIcon(OutputState buttons, CommunicationBackendI
     if(buttons.home) {
         if(backend == COMMS_BACKEND_NINTENDO_SWITCH) {
             return Bitmap_Home_16;
+        } else if (backend == COMMS_BACKEND_PASSTHROUGH_PS4 || backend == COMMS_BACKEND_PASSTHROUGH_PS5) {
+            return Bitmap_Home_16;
         } else if (backend == COMMS_BACKEND_XINPUT || backend == COMMS_BACKEND_DINPUT) {
             return Bitmap_Home_16;
         }
@@ -163,6 +169,9 @@ const unsigned char *currentInputIcon(OutputState buttons, CommunicationBackendI
     if(buttons.capture) {
         if(backend == COMMS_BACKEND_NINTENDO_SWITCH) {
             return Bitmap_SWShare_16;
+        }
+        if(backend == COMMS_BACKEND_PASSTHROUGH_PS4 || backend == COMMS_BACKEND_PASSTHROUGH_PS5) {
+            return Bitmap_Touchpad_16;
         }
         if(switch_mode) {
             return Bitmap_SWShare_16;
@@ -290,7 +299,8 @@ void MenuButtonHints::UpdateDisplay(IntegratedDisplay *instance, Adafruit_GFX &d
         for(size_t i = 0; i < mode_config.applicable_backends_count; i++) {
             CommunicationBackendId b = mode_config.applicable_backends[i];
             if(b == COMMS_BACKEND_UNSPECIFIED) continue; //should never happen lol
-            if(b == COMMS_BACKEND_DINPUT || b == COMMS_BACKEND_NINTENDO_SWITCH || b == COMMS_BACKEND_XINPUT) {
+            if(b == COMMS_BACKEND_DINPUT || b == COMMS_BACKEND_NINTENDO_SWITCH || b == COMMS_BACKEND_XINPUT ||
+               b == COMMS_BACKEND_PASSTHROUGH_PS4 || b == COMMS_BACKEND_PASSTHROUGH_PS5) {
                 //need to change this based on the current usb backend but this is fine for now
                 //probably don't need to do anything here rn
             } else {
@@ -302,6 +312,8 @@ void MenuButtonHints::UpdateDisplay(IntegratedDisplay *instance, Adafruit_GFX &d
             case COMMS_BACKEND_DINPUT:
             case COMMS_BACKEND_XINPUT:
             case COMMS_BACKEND_NINTENDO_SWITCH:
+            case COMMS_BACKEND_PASSTHROUGH_PS4:
+            case COMMS_BACKEND_PASSTHROUGH_PS5:
                 connected_to_usb = true;
                 break;    
             default:
@@ -451,4 +463,3 @@ const char *MenuButtonHints::CurrentlyPressedButtonText() {
     }
     return "";
 }
-
