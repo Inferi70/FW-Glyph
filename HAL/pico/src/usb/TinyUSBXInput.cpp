@@ -5,6 +5,8 @@
 
 enum {
     VENDOR_REQUEST_MICROSOFT = 1,
+    XINPUT_DESC_TYPE_RESERVED = 0x21,
+    XINPUT_SECURITY_DESC_TYPE_RESERVED = 0x41,
 };
 
 static void xinput_init(void);
@@ -153,37 +155,51 @@ uint16_t xinput_open(
     const tusb_desc_interface_t *itf_descriptor,
     uint16_t max_length
 ) {
-    if (itf_descriptor->bInterfaceClass != TUSB_CLASS_VENDOR_SPECIFIC ||
-        itf_descriptor->bInterfaceSubClass != XINPUT_SUBCLASS_DEFAULT ||
-        itf_descriptor->bInterfaceProtocol != XINPUT_PROTOCOL_DEFAULT) {
-        return false;
+    uint16_t driver_length = 0;
+
+    if (itf_descriptor->bInterfaceClass != TUSB_CLASS_VENDOR_SPECIFIC) {
+        return 0;
     }
 
-    uint16_t driver_length = sizeof(tusb_desc_interface_t) +
-                             (itf_descriptor->bNumEndpoints * sizeof(tusb_desc_endpoint_t)) + 16;
+    if (itf_descriptor->bInterfaceSubClass == 0x5D &&
+        (itf_descriptor->bInterfaceProtocol == 0x01 || itf_descriptor->bInterfaceProtocol == 0x02 ||
+         itf_descriptor->bInterfaceProtocol == 0x03)) {
+        driver_length = sizeof(tusb_desc_interface_t) +
+                        (itf_descriptor->bNumEndpoints * sizeof(tusb_desc_endpoint_t));
+        TU_VERIFY(max_length >= driver_length, 0);
 
-    TU_VERIFY(max_length >= driver_length, 0);
+        auto const *descriptor = reinterpret_cast<uint8_t const *>(itf_descriptor);
+        descriptor = tu_desc_next(descriptor);
+        TU_VERIFY(descriptor[1] == XINPUT_DESC_TYPE_RESERVED, 0);
+        driver_length += descriptor[0];
+        descriptor = tu_desc_next(descriptor);
 
-    const uint8_t *current_descriptor = tu_desc_next(itf_descriptor);
-    uint8_t found_endpoints = 0;
-    while ((found_endpoints < itf_descriptor->bNumEndpoints) && (driver_length <= max_length)) {
-        const tusb_desc_endpoint_t *endpoint_descriptor =
-            reinterpret_cast<const tusb_desc_endpoint_t *>(current_descriptor);
-        if (TUSB_DESC_ENDPOINT == tu_desc_type(endpoint_descriptor)) {
-            TU_ASSERT(usbd_edpt_open(rhport, endpoint_descriptor));
-
-            if (tu_edpt_dir(endpoint_descriptor->bEndpointAddress) == TUSB_DIR_IN) {
-                xinput_dev->_endpoint_in = endpoint_descriptor->bEndpointAddress;
-            } else {
-                xinput_dev->_endpoint_out = endpoint_descriptor->bEndpointAddress;
-            }
-
-            ++found_endpoints;
+        if (itf_descriptor->bInterfaceProtocol == 0x01) {
+            TU_ASSERT(usbd_open_edpt_pair(
+                rhport,
+                descriptor,
+                itf_descriptor->bNumEndpoints,
+                TUSB_XFER_INTERRUPT,
+                &xinput_dev->_endpoint_out,
+                &xinput_dev->_endpoint_in
+            ), 0);
         }
 
-        current_descriptor = tu_desc_next(current_descriptor);
+        return driver_length;
     }
-    return driver_length;
+
+    if (itf_descriptor->bInterfaceSubClass == 0xFD && itf_descriptor->bInterfaceProtocol == 0x13) {
+        driver_length = sizeof(tusb_desc_interface_t);
+        TU_VERIFY(max_length >= driver_length, 0);
+
+        auto const *descriptor = reinterpret_cast<uint8_t const *>(itf_descriptor);
+        descriptor = tu_desc_next(descriptor);
+        TU_VERIFY(descriptor[1] == XINPUT_SECURITY_DESC_TYPE_RESERVED, 0);
+        driver_length += descriptor[0];
+        return driver_length;
+    }
+
+    return 0;
 }
 
 static bool xinput_control_xfer_callback(
