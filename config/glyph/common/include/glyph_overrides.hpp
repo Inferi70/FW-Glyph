@@ -14,8 +14,74 @@
 // clang-format off
 
 const Config default_config = {
-    .game_mode_configs_count = 13,
+    .game_mode_configs_count = 14,
     .game_mode_configs = {
+        GameModeConfig {
+            .mode_id = MODE_FGC,
+            .name = "Strive",
+            .socd_pairs_count = 2,
+            .socd_pairs = {
+                SocdPair { .button_dir1 = BTN_LF3, .button_dir2 = BTN_LF1, .socd_type = SOCD_NEUTRAL },
+                SocdPair { .button_dir1 = BTN_LF2, .button_dir2 = BTN_LT1, .socd_type = SOCD_2IP },
+            },
+            .button_remapping_count = 33,
+            .button_remapping = {
+                ButtonRemap { .physical_button = BTN_RF1,  .activates = BTN_RF6 },
+                ButtonRemap { .physical_button = BTN_RF6,  .activates = BTN_RF1 },
+                ButtonRemap { .physical_button = BTN_RF8,  .activates = BTN_LT2 },
+                ButtonRemap { .physical_button = BTN_LF8,  .activates = BTN_LF3 },
+                ButtonRemap { .physical_button = BTN_LF7,  .activates = BTN_LF2 },
+                ButtonRemap { .physical_button = BTN_LF6,  .activates = BTN_LF1 },
+                ButtonRemap { .physical_button = BTN_LT6,  .activates = BTN_LT1 },
+                ButtonRemap { .physical_button = BTN_RT3,  .activates = BTN_RF4 },
+                ButtonRemap { .physical_button = BTN_RT4,  .activates = BTN_RF3 },
+                ButtonRemap { .physical_button = BTN_RF13, .activates = BTN_MB6 },
+
+                ButtonRemap { .physical_button = BTN_LF1,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LF2,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LF3,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LF4,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LF5,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LT1,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LT2,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LT3,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LT4,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_LT5,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF9,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF10, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF11, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF12, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF14, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF15, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RF16, .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RT1,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RT2,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_RT5,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_MB1,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_MB2,  .activates = BTN_UNSPECIFIED },
+                ButtonRemap { .physical_button = BTN_MB3,  .activates = BTN_UNSPECIFIED },
+            },
+            .rgb_config = 5,
+            .layout_plate = LAYOUT_PLATE_EVERYTHING,
+            .applicable_backends_count = 5,
+            .applicable_backends = {
+                COMMS_BACKEND_XINPUT,
+                COMMS_BACKEND_DINPUT,
+                COMMS_BACKEND_NINTENDO_SWITCH,
+                COMMS_BACKEND_PASSTHROUGH_PS4,
+                COMMS_BACKEND_PASSTHROUGH_PS5,
+            },
+            .menu_button_icon_count = 7,
+            .menu_button_icon = {
+                OUT_UNSPECIFIED,
+                OUT_UNSPECIFIED,
+                OUT_UNSPECIFIED,
+                OUT_UNSPECIFIED,
+                OUT_HOME,
+                OUT_XB_BACK,
+                OUT_START,
+            }
+        },
         GameModeConfig {
             .mode_id = MODE_MELEE,
             .name = "Melee",
@@ -621,17 +687,18 @@ const Config default_config = {
             }
         },
     },
-    // 1  - Melee
-    // 2  - PM
-    // 3  - Ultimate
-    // 4  - Split FGC
-    // 5  - FGC
-    // 6  - Smash64
-    // 7  - RoA
-    // 8  - RoA2
-    // 9  - SNES
-    // 10 - NES
-    // 11 - Keyboard
+    // 1  - Strive
+    // 2  - Melee
+    // 3  - PM
+    // 4  - Ultimate
+    // 5  - Split FGC
+    // 6  - FGC
+    // 7  - Smash64
+    // 8  - RoA
+    // 9  - RoA2
+    // 10 - SNES
+    // 11 - NES
+    // 12 - Keyboard
     .communication_backend_configs_count = 10,
     .communication_backend_configs = {
         CommunicationBackendConfig {
@@ -646,7 +713,7 @@ const Config default_config = {
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_NINTENDO_SWITCH,
-            .default_mode_config = 3,
+            .default_mode_config = 1,
             .activation_binding_count = 1,
             .activation_binding = { BTN_RF2 },
         },
@@ -660,21 +727,21 @@ const Config default_config = {
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_GAMECUBE,
-            .default_mode_config = 1,
+            .default_mode_config = 2,
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_N64,
-            .default_mode_config = 6,
+            .default_mode_config = 7,
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_NES,
-            .default_mode_config = 10,
+            .default_mode_config = 11,
             .activation_binding_count = 1,
             .activation_binding = { BTN_LT1 },
         },
         CommunicationBackendConfig {
             .backend_id = COMMS_BACKEND_SNES,
-            .default_mode_config = 9,
+            .default_mode_config = 10,
             .activation_binding_count = 1,
             .activation_binding = { BTN_LT2 },
         },
