@@ -1,0 +1,2812 @@
+{
+  "gameModeConfigs": [
+    {
+      "modeId": "MODE_FGC",
+      "name": "Strive",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_2IP"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_RF1",
+          "activates": "BTN_RF6"
+        },
+        {
+          "physicalButton": "BTN_RF6",
+          "activates": "BTN_RF1"
+        },
+        {
+          "physicalButton": "BTN_RF8",
+          "activates": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_LF8",
+          "activates": "BTN_LF3"
+        },
+        {
+          "physicalButton": "BTN_LF7",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF6",
+          "activates": "BTN_LF1"
+        },
+        {
+          "physicalButton": "BTN_LT6",
+          "activates": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_RT3",
+          "activates": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RT4",
+          "activates": "BTN_RF3"
+        },
+        {
+          "physicalButton": "BTN_RF13",
+          "activates": "BTN_MB6"
+        },
+        {
+          "physicalButton": "BTN_LF1"
+        },
+        {
+          "physicalButton": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF3"
+        },
+        {
+          "physicalButton": "BTN_LF4"
+        },
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_RT1"
+        },
+        {
+          "physicalButton": "BTN_RT2"
+        },
+        {
+          "physicalButton": "BTN_RT5"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 1,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_XB_START"
+      ]
+    },
+    {
+      "modeId": "MODE_MELEE",
+      "name": "Melee",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_2IP_NO_REAC"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 2,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_PROJECT_M",
+      "name": "Brawl",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_2IP_NO_REAC"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_2IP_NO_REAC"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 3,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_ULTIMATE",
+      "name": "Ultimate",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_2IP"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 4,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_FGC",
+      "name": "Split FGC",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_RT1",
+          "activates": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_LF5",
+          "activates": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_RF9",
+          "activates": "BTN_RT1"
+        },
+        {
+          "physicalButton": "BTN_LF4"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_RT2"
+        },
+        {
+          "physicalButton": "BTN_RT3"
+        },
+        {
+          "physicalButton": "BTN_RT4"
+        },
+        {
+          "physicalButton": "BTN_RT5"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 5,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_XB_START"
+      ]
+    },
+    {
+      "modeId": "MODE_FGC",
+      "name": "FGC",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_RF1",
+          "activates": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RF5",
+          "activates": "BTN_RF8"
+        },
+        {
+          "physicalButton": "BTN_LF8",
+          "activates": "BTN_LF3"
+        },
+        {
+          "physicalButton": "BTN_LF7",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF6",
+          "activates": "BTN_LF1"
+        },
+        {
+          "physicalButton": "BTN_LT6",
+          "activates": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_RF10",
+          "activates": "BTN_RF1"
+        },
+        {
+          "physicalButton": "BTN_RF11",
+          "activates": "BTN_RF2"
+        },
+        {
+          "physicalButton": "BTN_RF12",
+          "activates": "BTN_RF3"
+        },
+        {
+          "physicalButton": "BTN_RF13",
+          "activates": "BTN_RF5"
+        },
+        {
+          "physicalButton": "BTN_RF14",
+          "activates": "BTN_RF6"
+        },
+        {
+          "physicalButton": "BTN_RF15",
+          "activates": "BTN_RF7"
+        },
+        {
+          "physicalButton": "BTN_RF16",
+          "activates": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_LF1"
+        },
+        {
+          "physicalButton": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF3"
+        },
+        {
+          "physicalButton": "BTN_LF4"
+        },
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_LT2"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_RF2"
+        },
+        {
+          "physicalButton": "BTN_RF3"
+        },
+        {
+          "physicalButton": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RF6"
+        },
+        {
+          "physicalButton": "BTN_RF7"
+        },
+        {
+          "physicalButton": "BTN_RF8"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RT1"
+        },
+        {
+          "physicalButton": "BTN_RT2"
+        },
+        {
+          "physicalButton": "BTN_RT3"
+        },
+        {
+          "physicalButton": "BTN_RT4"
+        },
+        {
+          "physicalButton": "BTN_RT5"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 6,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_XB_START"
+      ]
+    },
+    {
+      "modeId": "MODE_64",
+      "name": "Smash64",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_RT2"
+        },
+        {
+          "physicalButton": "BTN_RT3"
+        },
+        {
+          "physicalButton": "BTN_RT4"
+        },
+        {
+          "physicalButton": "BTN_RT5"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 7,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_N64",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_RIVALS_OF_AETHER",
+      "name": "RoA",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_2IP"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_RF7",
+          "activates": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_RF8",
+          "activates": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 8,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_RIVALS2",
+      "name": "RoA2",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_2IP"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_RF7",
+          "activates": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_RF8",
+          "activates": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_LF5"
+        },
+        {
+          "physicalButton": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 9,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_MELEE",
+      "name": "GameCube",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF2",
+          "activates": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_LF6",
+          "activates": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LF5",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_RF13",
+          "activates": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF10",
+          "activates": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_RF11",
+          "activates": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 10,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_GAMECUBE"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_MELEE",
+      "name": "N64",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_RF4",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_RT3",
+          "buttonDir2": "BTN_RT5",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_RT2",
+          "buttonDir2": "BTN_RT4",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF2",
+          "activates": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RF2",
+          "activates": "BTN_RF5"
+        },
+        {
+          "physicalButton": "BTN_LF6",
+          "activates": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LF5",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_RF13",
+          "activates": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF11",
+          "activates": "BTN_LF6"
+        },
+        {
+          "physicalButton": "BTN_RF10",
+          "activates": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF7"
+        },
+        {
+          "physicalButton": "BTN_LF8"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_LT6"
+        },
+        {
+          "physicalButton": "BTN_RF4"
+        },
+        {
+          "physicalButton": "BTN_RF5"
+        },
+        {
+          "physicalButton": "BTN_RF6"
+        },
+        {
+          "physicalButton": "BTN_RF7"
+        },
+        {
+          "physicalButton": "BTN_RF8"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 11,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_XINPUT",
+        "COMMS_BACKEND_NINTENDO_SWITCH",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5",
+        "COMMS_BACKEND_N64"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_FGC",
+      "name": "SNES",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF2",
+          "activates": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_LT1",
+          "activates": "BTN_RF8"
+        },
+        {
+          "physicalButton": "BTN_RT1",
+          "activates": "BTN_RF7"
+        },
+        {
+          "physicalButton": "BTN_RF1",
+          "activates": "BTN_RF2"
+        },
+        {
+          "physicalButton": "BTN_RF2",
+          "activates": "BTN_RF1"
+        },
+        {
+          "physicalButton": "BTN_RF5",
+          "activates": "BTN_RF6"
+        },
+        {
+          "physicalButton": "BTN_RF6",
+          "activates": "BTN_RF5"
+        },
+        {
+          "physicalButton": "BTN_LF5",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF4"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_RF7"
+        },
+        {
+          "physicalButton": "BTN_RF8"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 12,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_SNES"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_FGC",
+      "name": "NES",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_NEUTRAL"
+        },
+        {
+          "buttonDir1": "BTN_LF2",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_NEUTRAL"
+        }
+      ],
+      "buttonRemapping": [
+        {
+          "physicalButton": "BTN_LF2",
+          "activates": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_RF1",
+          "activates": "BTN_RF2"
+        },
+        {
+          "physicalButton": "BTN_RF2",
+          "activates": "BTN_RF1"
+        },
+        {
+          "physicalButton": "BTN_LF5",
+          "activates": "BTN_LF2"
+        },
+        {
+          "physicalButton": "BTN_LF4"
+        },
+        {
+          "physicalButton": "BTN_LT1"
+        },
+        {
+          "physicalButton": "BTN_LT3"
+        },
+        {
+          "physicalButton": "BTN_LT4"
+        },
+        {
+          "physicalButton": "BTN_LT5"
+        },
+        {
+          "physicalButton": "BTN_RF9"
+        },
+        {
+          "physicalButton": "BTN_RF10"
+        },
+        {
+          "physicalButton": "BTN_RF11"
+        },
+        {
+          "physicalButton": "BTN_RF12"
+        },
+        {
+          "physicalButton": "BTN_RF13"
+        },
+        {
+          "physicalButton": "BTN_RF14"
+        },
+        {
+          "physicalButton": "BTN_RF15"
+        },
+        {
+          "physicalButton": "BTN_RF16"
+        },
+        {
+          "physicalButton": "BTN_MB1"
+        },
+        {
+          "physicalButton": "BTN_MB2"
+        },
+        {
+          "physicalButton": "BTN_MB3"
+        }
+      ],
+      "rgbConfig": 13,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_NES"
+      ],
+      "menuButtonIcon": [
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_UNSPECIFIED",
+        "OUT_HOME",
+        "OUT_XB_BACK",
+        "OUT_START"
+      ]
+    },
+    {
+      "modeId": "MODE_KEYBOARD",
+      "name": "Keyboard",
+      "socdPairs": [
+        {
+          "buttonDir1": "BTN_LF3",
+          "buttonDir2": "BTN_LF1",
+          "socdType": "SOCD_2IP"
+        },
+        {
+          "buttonDir1": "BTN_RT4",
+          "buttonDir2": "BTN_LT1",
+          "socdType": "SOCD_2IP"
+        }
+      ],
+      "keyboardModeConfig": 1,
+      "rgbConfig": 14,
+      "layoutPlate": "LAYOUT_PLATE_EVERYTHING",
+      "applicableBackends": [
+        "COMMS_BACKEND_DINPUT",
+        "COMMS_BACKEND_PASSTHROUGH_PS4",
+        "COMMS_BACKEND_PASSTHROUGH_PS5"
+      ]
+    }
+  ],
+  "communicationBackendConfigs": [
+    {
+      "backendId": "COMMS_BACKEND_XINPUT",
+      "defaultModeConfig": 1
+    },
+    {
+      "backendId": "COMMS_BACKEND_NINTENDO_SWITCH",
+      "defaultModeConfig": 1
+    },
+    {
+      "backendId": "COMMS_BACKEND_PASSTHROUGH_PS4",
+      "defaultModeConfig": 1
+    },
+    {
+      "backendId": "COMMS_BACKEND_PASSTHROUGH_PS5",
+      "defaultModeConfig": 1
+    },
+    {
+      "backendId": "COMMS_BACKEND_DINPUT",
+      "defaultModeConfig": 1
+    },
+    {
+      "backendId": "COMMS_BACKEND_GAMECUBE",
+      "defaultModeConfig": 2
+    },
+    {
+      "backendId": "COMMS_BACKEND_N64",
+      "defaultModeConfig": 7
+    },
+    {
+      "backendId": "COMMS_BACKEND_NES",
+      "defaultModeConfig": 13
+    },
+    {
+      "backendId": "COMMS_BACKEND_SNES",
+      "defaultModeConfig": 12
+    },
+    {
+      "backendId": "COMMS_BACKEND_CONFIGURATOR",
+      "activationBinding": [
+        "BTN_RT2"
+      ]
+    }
+  ],
+  "keyboardModes": [
+    {
+      "buttonsToKeycodes": [
+        {
+          "button": "BTN_LF1",
+          "keycode": 4
+        },
+        {
+          "button": "BTN_LF2",
+          "keycode": 5
+        },
+        {
+          "button": "BTN_LF3",
+          "keycode": 6
+        },
+        {
+          "button": "BTN_LF4",
+          "keycode": 7
+        },
+        {
+          "button": "BTN_LF5",
+          "keycode": 8
+        },
+        {
+          "button": "BTN_LF6",
+          "keycode": 9
+        },
+        {
+          "button": "BTN_LF7",
+          "keycode": 10
+        },
+        {
+          "button": "BTN_LF8",
+          "keycode": 11
+        },
+        {
+          "button": "BTN_LT1",
+          "keycode": 12
+        },
+        {
+          "button": "BTN_LT2",
+          "keycode": 13
+        },
+        {
+          "button": "BTN_LT3",
+          "keycode": 14
+        },
+        {
+          "button": "BTN_LT4",
+          "keycode": 15
+        },
+        {
+          "button": "BTN_LT5",
+          "keycode": 16
+        },
+        {
+          "button": "BTN_LT6",
+          "keycode": 17
+        },
+        {
+          "button": "BTN_RF1",
+          "keycode": 18
+        },
+        {
+          "button": "BTN_RF2",
+          "keycode": 19
+        },
+        {
+          "button": "BTN_RF3",
+          "keycode": 20
+        },
+        {
+          "button": "BTN_RF4",
+          "keycode": 21
+        },
+        {
+          "button": "BTN_RF5",
+          "keycode": 22
+        },
+        {
+          "button": "BTN_RF6",
+          "keycode": 23
+        },
+        {
+          "button": "BTN_RF7",
+          "keycode": 24
+        },
+        {
+          "button": "BTN_RF8",
+          "keycode": 25
+        },
+        {
+          "button": "BTN_RF9",
+          "keycode": 26
+        },
+        {
+          "button": "BTN_RF10",
+          "keycode": 27
+        },
+        {
+          "button": "BTN_RF11",
+          "keycode": 28
+        },
+        {
+          "button": "BTN_RF12",
+          "keycode": 29
+        },
+        {
+          "button": "BTN_RF13",
+          "keycode": 30
+        },
+        {
+          "button": "BTN_RF14",
+          "keycode": 31
+        },
+        {
+          "button": "BTN_RF15",
+          "keycode": 32
+        },
+        {
+          "button": "BTN_RF16",
+          "keycode": 33
+        },
+        {
+          "button": "BTN_RT1",
+          "keycode": 34
+        },
+        {
+          "button": "BTN_RT2",
+          "keycode": 35
+        },
+        {
+          "button": "BTN_RT3",
+          "keycode": 36
+        },
+        {
+          "button": "BTN_RT4",
+          "keycode": 37
+        },
+        {
+          "button": "BTN_RT5",
+          "keycode": 38
+        }
+      ]
+    }
+  ],
+  "rgbConfigs": [
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_MB1"
+        },
+        {
+          "button": "BTN_LF1"
+        },
+        {
+          "button": "BTN_LF2"
+        },
+        {
+          "button": "BTN_LF3"
+        },
+        {
+          "button": "BTN_LF4"
+        },
+        {
+          "button": "BTN_LF5"
+        },
+        {
+          "button": "BTN_LF6",
+          "color": 9158085
+        },
+        {
+          "button": "BTN_LF7",
+          "color": 9158085
+        },
+        {
+          "button": "BTN_LF8",
+          "color": 9158085
+        },
+        {
+          "button": "BTN_LT1"
+        },
+        {
+          "button": "BTN_LT2"
+        },
+        {
+          "button": "BTN_LT3"
+        },
+        {
+          "button": "BTN_LT4"
+        },
+        {
+          "button": "BTN_LT5"
+        },
+        {
+          "button": "BTN_LT6",
+          "color": 9158085
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 12563515
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 11602185
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 11369
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 4128870
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 9158085
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 951598
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 8816262
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 8816262
+        },
+        {
+          "button": "BTN_RF9"
+        },
+        {
+          "button": "BTN_RF10"
+        },
+        {
+          "button": "BTN_RF11"
+        },
+        {
+          "button": "BTN_RF12"
+        },
+        {
+          "button": "BTN_RF13",
+          "color": 8816262
+        },
+        {
+          "button": "BTN_RF14"
+        },
+        {
+          "button": "BTN_RF15"
+        },
+        {
+          "button": "BTN_RF16"
+        },
+        {
+          "button": "BTN_RT1"
+        },
+        {
+          "button": "BTN_RT2"
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 4128870
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 11369
+        },
+        {
+          "button": "BTN_RT5"
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF9",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF10",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF11",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF12",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF13",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF14",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF15",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF16",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF7",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF8",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF13",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF10",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF11",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT4",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF13",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF11",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF10",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {}
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        }
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    },
+    {
+      "buttonColors": [
+        {
+          "button": "BTN_LF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF3",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF2",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF5",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RF6",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_RT1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_MB1",
+          "color": 2282478
+        },
+        {
+          "button": "BTN_LF5",
+          "color": 2282478
+        },
+        {}
+      ],
+      "animation": "RGB_ANIM_STATIC"
+    }
+  ],
+  "defaultBackendConfig": 1,
+  "defaultUsbBackendConfig": 1,
+  "rgbBrightness": 255,
+  "defaultDashboardOption": "DASHBOARD_MENU_BUTTON_HINTS"
+}
