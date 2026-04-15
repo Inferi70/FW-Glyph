@@ -39,10 +39,10 @@ void Smash64::UpdateDigitalOutputs(const InputState &inputs, OutputState &output
     outputs.rightStickDown = inputs.rf2;
     outputs.rightStickUp = inputs.rf6;
 
-    outputs.dpadLeft = inputs.lf3;
-    outputs.dpadRight = inputs.lf1;
-    outputs.dpadDown = inputs.lf2;
     outputs.dpadUp = inputs.lt6;
+    outputs.dpadDown = inputs.lf7;
+    outputs.dpadLeft = inputs.lf8;
+    outputs.dpadRight = inputs.lf6;
 }
 
 void Smash64::UpdateAnalogOutputs(const InputState &inputs, OutputState &outputs, CommunicationBackendId backend_id) {
