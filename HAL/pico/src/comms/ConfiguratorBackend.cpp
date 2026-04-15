@@ -65,14 +65,11 @@ void ConfiguratorBackend::SendReport() {
             HandleGetConfig();
             break;
         case CMD_SET_CONFIG:
-            rp2040.idleOtherCore();
             if(HandleSetConfig()) {
-                rp2040.resumeOtherCore();
                 watchdog_hw->scratch[0] = 0;
                 watchdog_hw->scratch[1] = 0;
                 reboot_firmware();
             }
-            rp2040.resumeOtherCore();
             break;
         case CMD_REBOOT_FIRMWARE:
             reboot_firmware();
