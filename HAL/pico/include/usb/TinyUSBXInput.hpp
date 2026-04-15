@@ -21,7 +21,7 @@
 #define XINPUT_SECURITY_STRING "Xbox Security Method 3, Version 1.00, \xA9 2005 Microsoft Corporation. All rights reserved."
 
 #define TUD_XINPUT_DESCRIPTOR(_itfnum, _stridx, _epout, _epin, _epsize, _ep_interval) \
-  9, TUSB_DESC_INTERFACE, _itfnum, 0, 2, TUSB_CLASS_VENDOR_SPECIFIC, 0x5D, 0x01, _stridx, \
+  9, TUSB_DESC_INTERFACE, _itfnum, 0, 2, TUSB_CLASS_VENDOR_SPECIFIC, 0x5D, 0x01, 0, \
   17, HID_DESC_TYPE_HID, U16_TO_U8S_LE(0x0100), 0x01, 0x25, _epin, 0x14, 0x00, 0x00, 0x00, 0x00, 0x13, _epout, 0x08, 0x00, 0x00, \
   7, TUSB_DESC_ENDPOINT, _epin, TUSB_XFER_INTERRUPT, U16_TO_U8S_LE(_epsize), _ep_interval, \
   7, TUSB_DESC_ENDPOINT, _epout, TUSB_XFER_INTERRUPT, U16_TO_U8S_LE(_epsize), 8, \

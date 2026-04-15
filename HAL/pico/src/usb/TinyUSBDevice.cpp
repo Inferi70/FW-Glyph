@@ -335,6 +335,9 @@ uint16_t const *Adafruit_USBD_Device::descriptor_string_cb(uint8_t index, uint16
 extern "C" {
 
 uint8_t const *tud_descriptor_device_cb(void) {
+    TinyUSBDevice._desc_device.bDeviceClass = runtime_device_class;
+    TinyUSBDevice._desc_device.bDeviceSubClass = runtime_device_subclass;
+    TinyUSBDevice._desc_device.bDeviceProtocol = runtime_device_protocol;
     return (uint8_t const *)&TinyUSBDevice._desc_device;
 }
 
