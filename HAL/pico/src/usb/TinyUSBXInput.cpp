@@ -155,6 +155,13 @@ uint16_t xinput_open(
                 &xinput_dev->_endpoint_out,
                 &xinput_dev->_endpoint_in
             ), 0);
+        } else {
+            for (uint8_t i = 0; i < itf_descriptor->bNumEndpoints; i++) {
+                auto const *endpoint = reinterpret_cast<tusb_desc_endpoint_t const *>(descriptor);
+                TU_ASSERT(endpoint->bDescriptorType == TUSB_DESC_ENDPOINT, 0);
+                TU_ASSERT(usbd_edpt_open(rhport, endpoint), 0);
+                descriptor = tu_desc_next(descriptor);
+            }
         }
 
         return driver_length;

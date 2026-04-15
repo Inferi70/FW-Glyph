@@ -22,7 +22,6 @@ XInputBackend::XInputBackend(
     usb_runtime::setDeviceClassCodes(0xFF, 0xFF, 0xFF);
 
     _xinput.begin();
-    Serial.begin(115200);
 
     absolute_time_t start_time = get_absolute_time();
     while (!_xinput.ready()) {
