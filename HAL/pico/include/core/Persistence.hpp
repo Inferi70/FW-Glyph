@@ -43,6 +43,7 @@ class Persistence {
     static constexpr char config_filename[] = "config.bin";
     char _last_error[96] = {};
 
+    bool EnsureMounted();
     bool CheckSavedConfig(File &config_file);
     bool SetError(const char *message);
 };

@@ -28,7 +28,6 @@
 #include <pb_encode.h>
 
 Persistence::Persistence() {
-    LittleFS.begin();
 }
 
 Persistence::~Persistence() {
@@ -45,8 +44,18 @@ bool Persistence::SetError(const char *message) {
     return false;
 }
 
+bool Persistence::EnsureMounted() {
+    if (LittleFS.begin()) {
+        return true;
+    }
+    return SetError("LittleFS.begin failed");
+}
+
 bool Persistence::SaveConfig(Config &config) {
     _last_error[0] = '\0';
+    if (!EnsureMounted()) {
+        return false;
+    }
 
     // Make sure config encodes correctly.
     size_t encoded_size;
@@ -105,6 +114,9 @@ bool Persistence::SaveConfig(Config &config) {
 
 bool Persistence::LoadConfig(Config &config) {
     _last_error[0] = '\0';
+    if (!EnsureMounted()) {
+        return false;
+    }
 
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
@@ -140,6 +152,9 @@ bool Persistence::LoadConfig(Config &config) {
 
 bool Persistence::CheckSavedConfig() {
     _last_error[0] = '\0';
+    if (!EnsureMounted()) {
+        return false;
+    }
 
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
@@ -154,6 +169,9 @@ bool Persistence::CheckSavedConfig() {
 
 size_t Persistence::LoadConfigRaw(Print &out, bool validate) {
     _last_error[0] = '\0';
+    if (!EnsureMounted()) {
+        return false;
+    }
 
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
