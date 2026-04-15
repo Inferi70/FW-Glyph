@@ -35,13 +35,16 @@ class Persistence {
     bool LoadConfig(Config &config);
     bool CheckSavedConfig();
     size_t LoadConfigRaw(Print &out, bool validate = true);
+    const char *LastError() const;
 
     static constexpr size_t config_offset = sizeof(ConfigHeader);
 
   private:
     static constexpr char config_filename[] = "config.bin";
+    char _last_error[96] = {};
 
     bool CheckSavedConfig(File &config_file);
+    bool SetError(const char *message);
 };
 
 extern Persistence persistence;

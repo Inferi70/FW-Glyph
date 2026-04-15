@@ -21,6 +21,7 @@
 
 #include <CRC32.h>
 #include <LittleFS.h>
+#include <cstring>
 #include <memory>
 #include <pb_arduino.h>
 #include <pb_decode.h>
@@ -34,22 +35,34 @@ Persistence::~Persistence() {
     LittleFS.end();
 }
 
+const char *Persistence::LastError() const {
+    return _last_error;
+}
+
+bool Persistence::SetError(const char *message) {
+    strncpy(_last_error, message ? message : "unknown", sizeof(_last_error) - 1);
+    _last_error[sizeof(_last_error) - 1] = '\0';
+    return false;
+}
+
 bool Persistence::SaveConfig(Config &config) {
+    _last_error[0] = '\0';
+
     // Make sure config encodes correctly.
     size_t encoded_size;
     if (!pb_get_encoded_size(&encoded_size, Config_fields, &config)) {
-        return false;
+        return SetError("pb_get_encoded_size failed");
     }
 
     auto encoded = std::make_unique<uint8_t[]>(encoded_size);
     if (!encoded) {
-        return false;
+        return SetError("buffer allocation failed");
     }
 
     // Encode Protobuf data in RAM first so the flash write is a single validated pass.
     pb_ostream_t ostream = pb_ostream_from_buffer(encoded.get(), encoded_size);
     if (!pb_encode(&ostream, Config_fields, &config)) {
-        return false;
+        return SetError("pb_encode failed");
     }
 
     CRC32 crc;
@@ -64,30 +77,39 @@ bool Persistence::SaveConfig(Config &config) {
 
     File config_file = LittleFS.open(config_filename, "w+");
     if (!config_file) {
-        return false;
+        return SetError("LittleFS.open(w+) failed");
     }
 
     if (config_file.write((uint8_t *)&header, sizeof(ConfigHeader)) != sizeof(ConfigHeader)) {
         config_file.close();
-        return false;
+        return SetError("header write failed");
     }
     if (config_file.write(encoded.get(), ostream.bytes_written) != ostream.bytes_written) {
         config_file.close();
-        return false;
+        return SetError("config write failed");
     }
     config_file.flush();
 
     // Persist changes.
     config_file.close();
 
-    return CheckSavedConfig();
+    if (!CheckSavedConfig()) {
+        if (_last_error[0] == '\0') {
+            SetError("post-save validation failed");
+        }
+        return false;
+    }
+
+    return true;
 }
 
 bool Persistence::LoadConfig(Config &config) {
+    _last_error[0] = '\0';
+
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
     if (!config_file) {
-        return false;
+        return SetError("LittleFS.open(r) failed");
     }
 
     if (!CheckSavedConfig(config_file)) {
@@ -98,7 +120,7 @@ bool Persistence::LoadConfig(Config &config) {
     // Seek to start of Protobuf data.
     if (!config_file.seek(config_offset)) {
         config_file.close();
-        return false;
+        return SetError("seek to config body failed");
     }
 
     // Reset config defaults first, so config is completely replaced rather than merged with
@@ -109,7 +131,7 @@ bool Persistence::LoadConfig(Config &config) {
     pb_istream_t istream = as_pb_istream(config_file, (size_t)config_file.available());
     if (!pb_decode(&istream, Config_fields, &config)) {
         config_file.close();
-        return false;
+        return SetError("pb_decode failed");
     }
 
     config_file.close();
@@ -117,10 +139,12 @@ bool Persistence::LoadConfig(Config &config) {
 }
 
 bool Persistence::CheckSavedConfig() {
+    _last_error[0] = '\0';
+
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
     if (!config_file) {
-        return false;
+        return SetError("LittleFS.open(r) failed");
     }
 
     bool is_valid = CheckSavedConfig(config_file);
@@ -129,9 +153,12 @@ bool Persistence::CheckSavedConfig() {
 }
 
 size_t Persistence::LoadConfigRaw(Print &out, bool validate) {
+    _last_error[0] = '\0';
+
     // Open file to load config data from.
     File config_file = LittleFS.open(config_filename, "r");
     if (!config_file) {
+        SetError("LittleFS.open(r) failed");
         return false;
     }
 
@@ -144,6 +171,7 @@ size_t Persistence::LoadConfigRaw(Print &out, bool validate) {
     // Seek to start of Protobuf data.
     if (!config_file.seek(config_offset)) {
         config_file.close();
+        SetError("seek to config body failed");
         return false;
     }
 
@@ -159,18 +187,21 @@ size_t Persistence::LoadConfigRaw(Print &out, bool validate) {
 
 bool Persistence::CheckSavedConfig(File &config_file) {
     size_t file_size = config_file.size();
+    if (file_size < config_offset) {
+        return SetError("config file too small");
+    }
 
     // Read file header.
     ConfigHeader header;
     size_t bytes_read = config_file.read((uint8_t *)&header, sizeof(ConfigHeader));
     if (bytes_read < sizeof(ConfigHeader)) {
-        return false;
+        return SetError("header read failed");
     }
 
     // Validate config length.
     size_t config_size = file_size - config_offset;
     if (config_size != header.config_size) {
-        return false;
+        return SetError("config size mismatch");
     }
 
     // Calculate CRC for file contents and compare with CRC in header.
@@ -180,7 +211,7 @@ bool Persistence::CheckSavedConfig(File &config_file) {
         crc.update((uint8_t)value);
     }
     if (crc.finalize() != header.config_crc) {
-        return false;
+        return SetError("config CRC mismatch");
     }
 
     return true;

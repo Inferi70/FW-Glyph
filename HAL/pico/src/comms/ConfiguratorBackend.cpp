@@ -152,8 +152,14 @@ bool ConfiguratorBackend::HandleGetDeviceInfo() {
 
 bool ConfiguratorBackend::HandleGetConfig() {
     if (!persistence.CheckSavedConfig()) {
-        char errmsg[] = "Config file is invalid";
-        WritePacket(CMD_ERROR, (uint8_t *)errmsg, sizeof(errmsg));
+        char errmsg[128];
+        size_t errmsg_len = snprintf(
+            errmsg,
+            sizeof(errmsg),
+            "Config file is invalid: %s",
+            persistence.LastError()
+        );
+        WritePacket(CMD_ERROR, (uint8_t *)errmsg, errmsg_len);
         return false;
     }
 
@@ -268,8 +274,14 @@ bool ConfiguratorBackend::HandleSetConfig() {
     }
 
     if (!persistence.SaveConfig(_config)) {
-        char errmsg[] = "Failed to save config to memory";
-        WritePacket(CMD_ERROR, (uint8_t *)errmsg, sizeof(errmsg));
+        char errmsg[128];
+        size_t errmsg_len = snprintf(
+            errmsg,
+            sizeof(errmsg),
+            "Failed to save config to memory: %s",
+            persistence.LastError()
+        );
+        WritePacket(CMD_ERROR, (uint8_t *)errmsg, errmsg_len);
         return false;
     }
 
