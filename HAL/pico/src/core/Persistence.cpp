@@ -57,8 +57,14 @@ bool Persistence::SaveConfig(Config &config) {
         return false;
     }
 
+    // Sync file contents before reading the same handle back for CRC validation.
+    config_file.flush();
+
     // Calculate checksum.
-    config_file.seek(config_offset);
+    if (!config_file.seek(config_offset)) {
+        config_file.close();
+        return false;
+    }
     CRC32 crc;
     int value;
     while ((value = config_file.read()) != -1) {
@@ -68,13 +74,20 @@ bool Persistence::SaveConfig(Config &config) {
     // Update header.
     header.config_size = ostream.bytes_written;
     header.config_crc = crc.finalize();
-    config_file.seek(0);
-    config_file.write((uint8_t *)&header, sizeof(ConfigHeader));
+    if (!config_file.seek(0)) {
+        config_file.close();
+        return false;
+    }
+    if (config_file.write((uint8_t *)&header, sizeof(ConfigHeader)) != sizeof(ConfigHeader)) {
+        config_file.close();
+        return false;
+    }
+    config_file.flush();
 
     // Persist changes.
     config_file.close();
 
-    return true;
+    return CheckSavedConfig();
 }
 
 bool Persistence::LoadConfig(Config &config) {
