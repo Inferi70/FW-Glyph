@@ -4,7 +4,6 @@
 #include "tusb_option.h"
 
 enum {
-    VENDOR_REQUEST_MICROSOFT = 1,
     XINPUT_DESC_TYPE_RESERVED = 0x21,
     XINPUT_SECURITY_DESC_TYPE_RESERVED = 0x41,
 };
@@ -34,49 +33,23 @@ static usbd_class_driver_t const xinput_driver = {
     .sof = nullptr
 };
 
-#define BOS_TOTAL_LEN (TUD_BOS_DESC_LEN + TUD_BOS_MICROSOFT_OS_DESC_LEN)
-#define MS_OS_20_DESC_LEN 0xB2
-
-const uint8_t desc_bos[] = {
-    TUD_BOS_DESCRIPTOR(BOS_TOTAL_LEN, 1),
-    TUD_BOS_MS_OS_20_DESCRIPTOR(MS_OS_20_DESC_LEN, VENDOR_REQUEST_MICROSOFT)
-};
-
 static TinyUSBXInput *xinput_dev = nullptr;
-
-uint8_t desc_ms_os_20[MS_OS_20_DESC_LEN] = {
-    U16_TO_U8S_LE(0x000A), U16_TO_U8S_LE(MS_OS_20_SET_HEADER_DESCRIPTOR),
-    U32_TO_U8S_LE(0x06030000), U16_TO_U8S_LE(MS_OS_20_DESC_LEN),
-    U16_TO_U8S_LE(0x0008), U16_TO_U8S_LE(MS_OS_20_SUBSET_HEADER_CONFIGURATION),
-    0, 0, U16_TO_U8S_LE(MS_OS_20_DESC_LEN - 0x0A),
-    U16_TO_U8S_LE(0x0008), U16_TO_U8S_LE(MS_OS_20_SUBSET_HEADER_FUNCTION),
-    0, 0, U16_TO_U8S_LE(MS_OS_20_DESC_LEN - 0x0A - 0x08),
-    U16_TO_U8S_LE(0x0014), U16_TO_U8S_LE(MS_OS_20_FEATURE_COMPATBLE_ID), 'X',
-    'U', 'S', 'B', '2', '0', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-    U16_TO_U8S_LE(MS_OS_20_DESC_LEN - 0x0A - 0x08 - 0x08 - 0x14),
-    U16_TO_U8S_LE(MS_OS_20_FEATURE_REG_PROPERTY), U16_TO_U8S_LE(0x0007),
-    U16_TO_U8S_LE(0x002A),
-    'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00, 'c', 0x00, 'e', 0x00, 'I', 0x00,
-    'n', 0x00, 't', 0x00, 'e', 0x00, 'r', 0x00, 'f', 0x00, 'a', 0x00, 'c', 0x00,
-    'e', 0x00, 'G', 0x00, 'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00, 0x00,
-    0x00,
-    U16_TO_U8S_LE(0x0050),
-    '{', 0x00, '8', 0x00, 'D', 0x00, '9', 0x00, '0', 0x00, '8', 0x00, '4', 0x00,
-    '2', 0x00, 'C', 0x00, '-', 0x00, '1', 0x00, '5', 0x00, '9', 0x00, '4', 0x00,
-    '-', 0x00, '4', 0x00, '1', 0x00, 'C', 0x00, 'E', 0x00, '-', 0x00, 'A', 0x00,
-    'A', 0x00, '3', 0x00, 'F', 0x00, '-', 0x00, '6', 0x00, '2', 0x00, 'D', 0x00,
-    '4', 0x00, '6', 0x00, '4', 0x00, 'E', 0x00, '1', 0x00, 'B', 0x00, 'E', 0x00,
-    '7', 0x00, '9', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00
-};
 
 TinyUSBXInput::TinyUSBXInput(uint8_t interval_ms) {
     _interval_ms = interval_ms;
 }
 
 uint16_t TinyUSBXInput::getInterfaceDescriptor(uint8_t itfnum, uint8_t *buf, uint16_t bufsize) {
+    const uint8_t security_stridx = TinyUSBDevice.addStringDescriptor(XINPUT_SECURITY_STRING);
     const uint8_t desc[] = {
-        TUD_XINPUT_DESCRIPTOR(itfnum, 0, XINPUT_EPOUT, XINPUT_EPIN, XINPUT_EPSIZE, _interval_ms)
+        TUD_XINPUT_DESCRIPTOR(
+            itfnum,
+            security_stridx,
+            XINPUT_EPOUT,
+            XINPUT_EPIN,
+            XINPUT_EPSIZE,
+            _interval_ms
+        )
     };
     const uint16_t len = sizeof(desc);
 
@@ -85,7 +58,6 @@ uint16_t TinyUSBXInput::getInterfaceDescriptor(uint8_t itfnum, uint8_t *buf, uin
     }
 
     memcpy(buf, desc, len);
-    desc_ms_os_20[0x0a + 0x08 + 4] = itfnum;
     return len;
 }
 
@@ -96,7 +68,7 @@ bool TinyUSBXInput::begin(void) {
         return false;
     }
 
-    TinyUSBDevice.setVersion(0x0210);
+    TinyUSBDevice.setVersion(0x0200);
     return true;
 }
 
@@ -248,26 +220,7 @@ bool xinput_vendor_control_xfer_cb(
         return true;
     }
 
-    switch (request->bmRequestType_bit.type) {
-        case TUSB_REQ_TYPE_VENDOR:
-            switch (request->bRequest) {
-                case VENDOR_REQUEST_MICROSOFT:
-                    if (request->wIndex == 7) {
-                        uint16_t total_len;
-                        memcpy(&total_len, desc_ms_os_20 + 8, 2);
-                        return tud_control_xfer(rhport, request, (void *)desc_ms_os_20, total_len);
-                    } else {
-                        return false;
-                    }
-                default:
-                    break;
-            }
-            break;
-        default:
-            return false;
-    }
-
-    return true;
+    return false;
 }
 
 extern "C" const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_count) {
@@ -276,7 +229,7 @@ extern "C" const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_cou
 }
 
 extern "C" const uint8_t *tud_descriptor_bos_cb(void) {
-    return desc_bos;
+    return nullptr;
 }
 
 extern "C" bool tud_vendor_control_xfer_cb(

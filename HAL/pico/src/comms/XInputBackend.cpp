@@ -13,10 +13,16 @@ XInputBackend::XInputBackend(
     : CommunicationBackend(inputs, input_sources, input_source_count),
       _xinput() {
     Serial.end();
+
+    usb_runtime::setManufacturer("Microsoft Corporation");
+    usb_runtime::setProduct("Controller");
+    usb_runtime::setDeviceId(0x045E, 0x028E);
+    usb_runtime::setDeviceVersion(0x0200);
+    usb_runtime::setDeviceRelease(0x0114);
+    usb_runtime::setDeviceClassCodes(0xFF, 0xFF, 0xFF);
+
     _xinput.begin();
     Serial.begin(115200);
-
-    usb_runtime::setDeviceId(0x0738, 0x4726);
 
     absolute_time_t start_time = get_absolute_time();
     while (!_xinput.ready()) {

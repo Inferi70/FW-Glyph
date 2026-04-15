@@ -7,6 +7,8 @@ namespace usb_runtime {
 
     void setDeviceId(uint16_t vid, uint16_t pid);
     void setDeviceVersion(uint16_t bcd);
+    void setDeviceRelease(uint16_t bcd);
+    void setDeviceClassCodes(uint8_t device_class, uint8_t device_subclass, uint8_t device_protocol);
     void setManufacturer(const char *manufacturer);
     void setProduct(const char *product);
     void setSerial(const char *serial);

@@ -48,6 +48,17 @@ enum { STRID_LANGUAGE = 0, STRID_MANUFACTURER, STRID_PRODUCT, STRID_SERIAL };
 
 Adafruit_USBD_Device TinyUSBDevice;
 
+static uint16_t runtime_vid = USB_VID;
+static uint16_t runtime_pid = USB_PID;
+static uint16_t runtime_usb_version = 0x0200;
+static uint16_t runtime_device_version = 0x0100;
+static uint8_t runtime_device_class = 0;
+static uint8_t runtime_device_subclass = 0;
+static uint8_t runtime_device_protocol = 0;
+static const char *runtime_manufacturer = USB_MANUFACTURER;
+static const char *runtime_product = USB_PRODUCT;
+static const char *runtime_serial = nullptr;
+
 Adafruit_USBD_Device::Adafruit_USBD_Device(void) {}
 
 void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t *buf, uint32_t buflen) {
@@ -61,15 +72,19 @@ void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t *buf, uint32_t buflen)
 }
 
 void Adafruit_USBD_Device::setID(uint16_t vid, uint16_t pid) {
+    runtime_vid = vid;
+    runtime_pid = pid;
     _desc_device.idVendor = vid;
     _desc_device.idProduct = pid;
 }
 
 void Adafruit_USBD_Device::setVersion(uint16_t bcd) {
+    runtime_usb_version = bcd;
     _desc_device.bcdUSB = bcd;
 }
 
 void Adafruit_USBD_Device::setDeviceVersion(uint16_t bcd) {
+    runtime_device_version = bcd;
     _desc_device.bcdDevice = bcd;
 }
 
@@ -78,14 +93,17 @@ void Adafruit_USBD_Device::setLanguageDescriptor(uint16_t language_id) {
 }
 
 void Adafruit_USBD_Device::setManufacturerDescriptor(const char *s) {
+    runtime_manufacturer = s;
     _desc_str_arr[STRID_MANUFACTURER] = s;
 }
 
 void Adafruit_USBD_Device::setProductDescriptor(const char *s) {
+    runtime_product = s;
     _desc_str_arr[STRID_PRODUCT] = s;
 }
 
 void Adafruit_USBD_Device::setSerialDescriptor(const char *s) {
+    runtime_serial = s;
     _desc_str_arr[STRID_SERIAL] = s;
 }
 
@@ -130,14 +148,14 @@ bool Adafruit_USBD_Device::attach(void) {
 void Adafruit_USBD_Device::clearConfiguration(void) {
     tusb_desc_device_t const desc_dev = {.bLength = sizeof(tusb_desc_device_t),
                                          .bDescriptorType = TUSB_DESC_DEVICE,
-                                         .bcdUSB = 0x0200,
-                                         .bDeviceClass = 0,
-                                         .bDeviceSubClass = 0,
-                                         .bDeviceProtocol = 0,
+                                         .bcdUSB = runtime_usb_version,
+                                         .bDeviceClass = runtime_device_class,
+                                         .bDeviceSubClass = runtime_device_subclass,
+                                         .bDeviceProtocol = runtime_device_protocol,
                                          .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-                                         .idVendor = USB_VID,
-                                         .idProduct = USB_PID,
-                                         .bcdDevice = 0x0100,
+                                         .idVendor = runtime_vid,
+                                         .idProduct = runtime_pid,
+                                         .bcdDevice = runtime_device_version,
                                          .iManufacturer = STRID_MANUFACTURER,
                                          .iProduct = STRID_PRODUCT,
                                          .iSerialNumber = STRID_SERIAL,
@@ -166,9 +184,9 @@ void Adafruit_USBD_Device::clearConfiguration(void) {
 
     memset(_desc_str_arr, 0, sizeof(_desc_str_arr));
     _desc_str_arr[STRID_LANGUAGE] = (const char *)((uint32_t)USB_LANGUAGE);
-    _desc_str_arr[STRID_MANUFACTURER] = USB_MANUFACTURER;
-    _desc_str_arr[STRID_PRODUCT] = USB_PRODUCT;
-    _desc_str_arr[STRID_SERIAL] = nullptr;
+    _desc_str_arr[STRID_MANUFACTURER] = runtime_manufacturer;
+    _desc_str_arr[STRID_PRODUCT] = runtime_product;
+    _desc_str_arr[STRID_SERIAL] = runtime_serial;
     _desc_str_count = 4;
 }
 
@@ -197,8 +215,26 @@ bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
             }
         } else if (tu_desc_type(desc) == TUSB_DESC_ENDPOINT) {
             tusb_desc_endpoint_t *desc_ep = (tusb_desc_endpoint_t *)desc;
-            desc_ep->bEndpointAddress |=
-                (desc_ep->bEndpointAddress & 0x80) ? _epin_count++ : _epout_count++;
+            uint8_t const dir = desc_ep->bEndpointAddress & 0x80;
+            uint8_t ep_num = desc_ep->bEndpointAddress & 0x0F;
+
+            // Keep explicitly assigned endpoint numbers intact for composite
+            // descriptors that must reference fixed addresses internally.
+            if (dir) {
+                if (ep_num == 0) {
+                    ep_num = _epin_count++;
+                } else if (_epin_count <= ep_num) {
+                    _epin_count = ep_num + 1;
+                }
+            } else {
+                if (ep_num == 0) {
+                    ep_num = _epout_count++;
+                } else if (_epout_count <= ep_num) {
+                    _epout_count = ep_num + 1;
+                }
+            }
+
+            desc_ep->bEndpointAddress = dir | ep_num;
         }
 
         if (desc[0] == 0) {
@@ -220,14 +256,27 @@ bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
 bool Adafruit_USBD_Device::begin(uint8_t rhport) {
     clearConfiguration();
 
-    _desc_device.bDeviceClass = TUSB_CLASS_MISC;
-    _desc_device.bDeviceSubClass = MISC_SUBCLASS_COMMON;
-    _desc_device.bDeviceProtocol = MISC_PROTOCOL_IAD;
+    if (runtime_device_class == 0 && runtime_device_subclass == 0 &&
+        runtime_device_protocol == 0) {
+        _desc_device.bDeviceClass = TUSB_CLASS_MISC;
+        _desc_device.bDeviceSubClass = MISC_SUBCLASS_COMMON;
+        _desc_device.bDeviceProtocol = MISC_PROTOCOL_IAD;
+    }
 
     SerialTinyUSB.begin(115200);
     TinyUSB_Port_InitDevice(rhport);
 
     return true;
+}
+
+extern "C" void TinyUSBDevice_SetDeviceClassCodes(
+    uint8_t device_class,
+    uint8_t device_subclass,
+    uint8_t device_protocol
+) {
+    runtime_device_class = device_class;
+    runtime_device_subclass = device_subclass;
+    runtime_device_protocol = device_protocol;
 }
 
 static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize);
